@@ -78,7 +78,8 @@ app.get("/", (req, res) => {
     backend: "https://tap-pin-pay-backend.vercel.app",
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || "development",
-    version: "2.1.0",
+    version: "2.2.0",
+    features: ["UPI Payment", "Success/Failure Pages", "Invoice Generation", "Food Database"],
   })
 })
 
@@ -96,6 +97,13 @@ app.get("/api/health", async (req, res) => {
       cors: "✅ Configured",
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || "development",
+      features: {
+        upiPayment: "✅ Enabled",
+        successPage: "✅ Enabled",
+        failurePage: "✅ Enabled",
+        invoiceGeneration: "✅ Enabled",
+        foodDatabase: "✅ Enabled",
+      },
     })
   } catch (error) {
     res.status(500).json({
@@ -183,52 +191,52 @@ app.get("/api/products", async (req, res) => {
       }
     }
 
-    // Enhanced sample data
+    // Enhanced sample data with food items
     const sampleProducts = {
-      PROD001: {
-        id: "PROD001",
-        name: "Wireless Bluetooth Headphones",
-        price: 79.99,
-        image: "/placeholder.svg?height=100&width=100&text=Headphones",
-        description: "High-quality wireless headphones with noise cancellation",
-        category: "Electronics",
+      FOOD001: {
+        id: "FOOD001",
+        name: "Vada Pav",
+        price: 25.0,
+        image: "/placeholder.svg?height=100&width=100&text=Vada+Pav",
+        description: "Mumbai's famous street food - spicy potato fritter in bun",
+        category: "Street Food",
         stock: 50,
       },
-      PROD002: {
-        id: "PROD002",
-        name: "Smart Phone Case",
-        price: 24.99,
-        image: "/placeholder.svg?height=100&width=100&text=Phone+Case",
-        description: "Protective case with wireless charging support",
-        category: "Accessories",
+      FOOD002: {
+        id: "FOOD002",
+        name: "Pav Bhaji",
+        price: 60.0,
+        image: "/placeholder.svg?height=100&width=100&text=Pav+Bhaji",
+        description: "Spicy vegetable curry served with buttered bread rolls",
+        category: "Street Food",
+        stock: 30,
+      },
+      FOOD003: {
+        id: "FOOD003",
+        name: "Dosa",
+        price: 45.0,
+        image: "/placeholder.svg?height=100&width=100&text=Dosa",
+        description: "Crispy South Indian crepe served with sambar and chutney",
+        category: "South Indian",
+        stock: 40,
+      },
+      FOOD004: {
+        id: "FOOD004",
+        name: "Biryani",
+        price: 120.0,
+        image: "/placeholder.svg?height=100&width=100&text=Biryani",
+        description: "Aromatic basmati rice with spiced chicken/mutton",
+        category: "Main Course",
+        stock: 25,
+      },
+      FOOD005: {
+        id: "FOOD005",
+        name: "Samosa",
+        price: 15.0,
+        image: "/placeholder.svg?height=100&width=100&text=Samosa",
+        description: "Crispy triangular pastry filled with spiced potatoes",
+        category: "Snacks",
         stock: 100,
-      },
-      PROD003: {
-        id: "PROD003",
-        name: "USB-C Cable",
-        price: 12.99,
-        image: "/placeholder.svg?height=100&width=100&text=USB+Cable",
-        description: "Fast charging USB-C cable, 6ft length",
-        category: "Cables",
-        stock: 200,
-      },
-      PROD004: {
-        id: "PROD004",
-        name: "Portable Power Bank",
-        price: 39.99,
-        image: "/placeholder.svg?height=100&width=100&text=Power+Bank",
-        description: "10000mAh portable charger with fast charging",
-        category: "Electronics",
-        stock: 75,
-      },
-      PROD005: {
-        id: "PROD005",
-        name: "Wireless Mouse",
-        price: 29.99,
-        image: "/placeholder.svg?height=100&width=100&text=Mouse",
-        description: "Ergonomic wireless mouse with precision tracking",
-        category: "Computer Accessories",
-        stock: 120,
       },
     }
 
@@ -267,40 +275,45 @@ app.get("/api/product/:id", async (req, res) => {
 
     // Sample data fallback
     const sampleProducts = {
-      PROD001: {
-        id: "PROD001",
-        name: "Wireless Bluetooth Headphones",
-        price: 79.99,
-        image: "/placeholder.svg?height=100&width=100&text=Headphones",
-        description: "High-quality wireless headphones with noise cancellation",
+      FOOD001: {
+        id: "FOOD001",
+        name: "Vada Pav",
+        price: 25.0,
+        image: "/placeholder.svg?height=100&width=100&text=Vada+Pav",
+        description: "Mumbai's famous street food - spicy potato fritter in bun",
+        category: "Street Food",
       },
-      PROD002: {
-        id: "PROD002",
-        name: "Smart Phone Case",
-        price: 24.99,
-        image: "/placeholder.svg?height=100&width=100&text=Phone+Case",
-        description: "Protective case with wireless charging support",
+      FOOD002: {
+        id: "FOOD002",
+        name: "Pav Bhaji",
+        price: 60.0,
+        image: "/placeholder.svg?height=100&width=100&text=Pav+Bhaji",
+        description: "Spicy vegetable curry served with buttered bread rolls",
+        category: "Street Food",
       },
-      PROD003: {
-        id: "PROD003",
-        name: "USB-C Cable",
-        price: 12.99,
-        image: "/placeholder.svg?height=100&width=100&text=USB+Cable",
-        description: "Fast charging USB-C cable, 6ft length",
+      FOOD003: {
+        id: "FOOD003",
+        name: "Dosa",
+        price: 45.0,
+        image: "/placeholder.svg?height=100&width=100&text=Dosa",
+        description: "Crispy South Indian crepe served with sambar and chutney",
+        category: "South Indian",
       },
-      PROD004: {
-        id: "PROD004",
-        name: "Portable Power Bank",
-        price: 39.99,
-        image: "/placeholder.svg?height=100&width=100&text=Power+Bank",
-        description: "10000mAh portable charger with fast charging",
+      FOOD004: {
+        id: "FOOD004",
+        name: "Biryani",
+        price: 120.0,
+        image: "/placeholder.svg?height=100&width=100&text=Biryani",
+        description: "Aromatic basmati rice with spiced chicken/mutton",
+        category: "Main Course",
       },
-      PROD005: {
-        id: "PROD005",
-        name: "Wireless Mouse",
-        price: 29.99,
-        image: "/placeholder.svg?height=100&width=100&text=Mouse",
-        description: "Ergonomic wireless mouse with precision tracking",
+      FOOD005: {
+        id: "FOOD005",
+        name: "Samosa",
+        price: 15.0,
+        image: "/placeholder.svg?height=100&width=100&text=Samosa",
+        description: "Crispy triangular pastry filled with spiced potatoes",
+        category: "Snacks",
       },
     }
 
@@ -316,11 +329,26 @@ app.get("/api/product/:id", async (req, res) => {
   }
 })
 
-// Orders endpoint with database integration
+// Enhanced Orders endpoint with better success handling
 app.post("/api/orders", async (req, res) => {
   try {
     const orderData = req.body
     const dbConnected = await connectDB()
+
+    // Enhanced order response
+    const orderResponse = {
+      success: true,
+      message: "✅ Order processed successfully!",
+      orderId: orderData.id,
+      transactionId: orderData.transactionId || "TXN" + Date.now(),
+      status: "completed",
+      paymentMethod: orderData.paymentMethod,
+      amount: orderData.finalTotal,
+      currency: orderData.currency || "INR",
+      timestamp: new Date().toISOString(),
+      items: orderData.items.length,
+      invoiceGenerated: true,
+    }
 
     if (dbConnected) {
       try {
@@ -336,31 +364,33 @@ app.post("/api/orders", async (req, res) => {
           })),
           subtotal: orderData.total,
           tax: orderData.tax,
-          total: orderData.total + orderData.tax,
+          total: orderData.finalTotal || orderData.total + orderData.tax,
           status: orderData.status || "completed",
+          paymentMethod: orderData.paymentMethod,
+          transactionId: orderData.transactionId,
         })
 
         await order.save()
 
-        return res.status(201).json({
-          message: "✅ Order saved to database successfully!",
-          orderId: order.orderId,
-          status: "completed",
-          timestamp: new Date().toISOString(),
-        })
+        orderResponse.databaseSaved = true
+        orderResponse.message = "✅ Order saved to database successfully!"
+
+        return res.status(201).json(orderResponse)
       } catch (dbError) {
         console.log("Database save failed, order processed without saving:", dbError.message)
+        orderResponse.databaseSaved = false
+        orderResponse.message = "✅ Order processed (database save failed but order is valid)"
       }
     }
 
-    res.status(201).json({
-      message: "✅ Order processed successfully!",
-      orderId: "ORD" + Date.now(),
-      status: "completed",
+    res.status(201).json(orderResponse)
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Failed to create order",
+      details: error.message,
       timestamp: new Date().toISOString(),
     })
-  } catch (error) {
-    res.status(500).json({ error: "Failed to create order", details: error.message })
   }
 })
 
@@ -379,6 +409,11 @@ app.get("/api/test-connection", async (req, res) => {
         frontend: "https://tap-pin-pay-qorb.vercel.app",
         backend: "https://tap-pin-pay-backend.vercel.app",
         timestamp: new Date().toISOString(),
+        features: {
+          upiPayment: "✅ Ready",
+          successFailurePages: "✅ Ready",
+          invoiceGeneration: "✅ Ready",
+        },
       })
     } else {
       res.status(500).json({

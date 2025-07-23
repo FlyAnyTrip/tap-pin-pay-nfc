@@ -10,19 +10,24 @@ const connectDB = async () => {
   }
 
   try {
-    // Use your MongoDB URI with specific database name
-    const mongoURI =
-      process.env.MONGODB_URI ||
-      "mongodb+srv://alispatel1112003:eRu2Kpql6QWXajHA@cluster0.cke1m7w.mongodb.net/pin-tap-pay?retryWrites=true&w=majority&appName=Cluster0"
+    // MongoDB URI with error handling
+    const mongoURI = process.env.MONGODB_URI
+
+    if (!mongoURI) {
+      throw new Error("MONGODB_URI environment variable is not defined")
+    }
+
+    console.log("🔄 Connecting to MongoDB...")
+    console.log("URI:", mongoURI.replace(/:[^:@]*@/, ":****@")) // Hide password in logs
 
     const conn = await mongoose.connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      maxPoolSize: 10, // Maintain up to 10 socket connections
-      serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
-      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-      bufferCommands: false, // Disable mongoose buffering
-      bufferMaxEntries: 0, // Disable mongoose buffering
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 10000, // Increased timeout
+      socketTimeoutMS: 45000,
+      bufferCommands: false,
+      bufferMaxEntries: 0,
     })
 
     isConnected = conn.connection.readyState === 1
@@ -30,11 +35,14 @@ const connectDB = async () => {
     console.log(`✅ MongoDB Connected Successfully!`)
     console.log(`🌐 Host: ${conn.connection.host}`)
     console.log(`📊 Database: ${conn.connection.name}`)
-    console.log(`🔗 Connection State: ${isConnected ? "Connected" : "Disconnected"}`)
+
+    return conn
   } catch (error) {
     console.error("❌ MongoDB connection error:", error.message)
     isConnected = false
-    throw error
+
+    // Don't throw error, let the app continue with error response
+    return null
   }
 }
 
@@ -45,7 +53,7 @@ mongoose.connection.on("connected", () => {
 })
 
 mongoose.connection.on("error", (err) => {
-  console.log("🔴 Mongoose connection error:", err)
+  console.log("🔴 Mongoose connection error:", err.message)
   isConnected = false
 })
 

@@ -1,36 +1,44 @@
 // API-based product data functions
+// Updated for separate server deployment
 const API_BASE_URL =
   process.env.NODE_ENV === "production"
-    ? "/api" // Use relative path in production
-    : import.meta.env.VITE_API_URL || "http://localhost:5000/api"
+    ? import.meta.env.VITE_API_URL || "https://qr-scanner-server-xyz.vercel.app/api" // Replace with your actual server URL
+    : "http://localhost:5000/api"
 
 export const getProductById = async (id) => {
   try {
+    console.log(`Fetching product from: ${API_BASE_URL}/product/${id}`)
     const response = await fetch(`${API_BASE_URL}/product/${id}`)
     if (response.ok) {
       const product = await response.json()
+      console.log("Product fetched successfully:", product)
       return product
     } else {
+      console.log("Product not found:", response.status)
       return null
     }
   } catch (error) {
     console.error("Error fetching product:", error)
-    return null
+    // Fallback to local data if API fails
+    return productDatabase[id] || null
   }
 }
 
 export const getAllProducts = async () => {
   try {
+    console.log(`Fetching all products from: ${API_BASE_URL}/products`)
     const response = await fetch(`${API_BASE_URL}/products`)
     if (response.ok) {
       const products = await response.json()
+      console.log("Products fetched successfully:", Object.keys(products).length, "products")
       return products
     } else {
-      return {}
+      console.log("Failed to fetch products:", response.status)
+      return productDatabase
     }
   } catch (error) {
     console.error("Error fetching products:", error)
-    return {}
+    return productDatabase
   }
 }
 
@@ -80,6 +88,7 @@ export const updateProductStock = async (productId, stock) => {
 
 export const createOrder = async (orderData) => {
   try {
+    console.log("Creating order at:", `${API_BASE_URL}/orders`)
     const response = await fetch(`${API_BASE_URL}/orders`, {
       method: "POST",
       headers: {
@@ -90,6 +99,7 @@ export const createOrder = async (orderData) => {
 
     if (response.ok) {
       const result = await response.json()
+      console.log("Order created successfully:", result)
       return result
     } else {
       throw new Error("Failed to create order")

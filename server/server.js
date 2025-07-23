@@ -16,10 +16,11 @@ const PORT = process.env.PORT || 5000
 // Middleware
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? ["https://your-vercel-app.vercel.app", "https://*.vercel.app"]
-        : ["http://localhost:3000", "http://127.0.0.1:3000"],
+    origin: [
+      "https://qr-scanner-client-xyz.vercel.app", // Replace with your actual client URL after deployment
+      "http://localhost:3000", // Keep for local development
+      /https:\/\/.*\.vercel\.app$/, // Allow all vercel apps for testing
+    ],
     credentials: true,
   }),
 )

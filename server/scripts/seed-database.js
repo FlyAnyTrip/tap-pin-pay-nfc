@@ -64,7 +64,7 @@ const sampleProducts = [
     id: "FOOD004",
     name: "Biryani",
     price: 120.0,
-    image: "/placeholder.svg?height=100&width=100&text=Biryani",
+    image: "/images/Biryani.jpg",  
     description: "Aromatic basmati rice with spiced chicken/mutton",
     category: "Main Course",
     stock: 25,

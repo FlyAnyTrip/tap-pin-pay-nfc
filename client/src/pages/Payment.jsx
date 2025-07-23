@@ -30,8 +30,8 @@ const Payment = () => {
   const handleUPIPayment = () => {
     const totalAmount = getFinalTotalINR()
     const orderId = "ORD" + Date.now()
-    // const upiIntent = `upi://pay?pa=asinghvns99-2@okicici&pn=QR Scanner Store&am=${totalAmount}&tn=Order ${orderId}&cu=INR`
-    const upiIntent = `upi://pay?pa=8511231514@axl&pn=QR Scanner Store&am=${totalAmount}&tn=Order ${orderId}&cu=INR`;
+    const upiIntent = `upi://pay?pa=asinghvns99-2@okicici&pn=QR Scanner Store&am=${totalAmount}&tn=Order ${orderId}&cu=INR`
+
     console.log("🔗 UPI Intent URL:", upiIntent)
 
     setIsProcessing(true)

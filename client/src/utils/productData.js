@@ -1,9 +1,6 @@
 // API-based product data functions
-// Updated for separate server deployment
-const API_BASE_URL =
-  process.env.NODE_ENV === "production"
-    ? import.meta.env.VITE_API_URL || "https://qr-scanner-server-xyz.vercel.app/api" // Replace with your actual server URL
-    : "http://localhost:5000/api"
+// Updated for your deployed backend
+const API_BASE_URL = "https://tap-pin-pay-backend.vercel.app/api"
 
 export const getProductById = async (id) => {
   try {
@@ -162,4 +159,24 @@ export const productDatabase = {
     image: "/placeholder.svg?height=100&width=100&text=Mouse",
     description: "Ergonomic wireless mouse with precision tracking",
   },
+}
+
+// Debug function to test API connectivity
+export const testAPIConnection = async () => {
+  try {
+    console.log("Testing API connection...")
+    const response = await fetch(`${API_BASE_URL}/health`)
+
+    if (response.ok) {
+      const result = await response.json()
+      console.log("✅ API Connection successful:", result)
+      return true
+    } else {
+      console.log("❌ API Connection failed:", response.status)
+      return false
+    }
+  } catch (error) {
+    console.error("❌ API Connection error:", error)
+    return false
+  }
 }

@@ -21,12 +21,6 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 3000,
-    proxy: {
-      "/api": {
-        target: process.env.NODE_ENV === "production" ? "YOUR_VERCEL_URL" : "http://localhost:5000",
-        changeOrigin: true,
-        secure: false,
-      },
-    },
+    // Removed proxy since we're using deployed backend
   },
 })

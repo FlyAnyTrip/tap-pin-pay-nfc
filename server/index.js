@@ -4,13 +4,21 @@ require("dotenv").config()
 
 const app = express()
 
-// Middleware
+// Updated CORS with your actual frontend URL
 app.use(
   cors({
-    origin: ["https://tap-pin-pay-frontend.vercel.app", "http://localhost:3000", /https:\/\/.*\.vercel\.app$/],
+    origin: [
+      "https://tap-pin-pay-qorb.vercel.app", // Your actual frontend URL
+      "https://tap-pin-pay-backend.vercel.app", // Your backend URL
+      "http://localhost:3000", // Local development
+      /https:\/\/.*\.vercel\.app$/, // All Vercel apps for testing
+    ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 )
+
 app.use(express.json())
 
 // MongoDB Connection - Fixed configuration
@@ -23,7 +31,6 @@ const connectDB = async () => {
       mongoose = require("mongoose")
     }
 
-    // If already connected, return
     if (isConnected && mongoose.connection.readyState === 1) {
       console.log("✅ Using existing MongoDB connection")
       return true
@@ -36,12 +43,10 @@ const connectDB = async () => {
 
     console.log("🔄 Connecting to MongoDB...")
 
-    // Close existing connection if any
     if (mongoose.connection.readyState !== 0) {
       await mongoose.disconnect()
     }
 
-    // Fixed connection options - removed unsupported options
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -49,7 +54,6 @@ const connectDB = async () => {
       connectTimeoutMS: 15000,
       socketTimeoutMS: 45000,
       maxPoolSize: 5,
-      // Removed bufferCommands and bufferMaxEntries - these were causing issues
     })
 
     isConnected = true
@@ -70,9 +74,11 @@ app.get("/", (req, res) => {
   res.json({
     message: "🚀 QR Scanner API Server is running!",
     status: "OK",
+    frontend: "https://tap-pin-pay-qorb.vercel.app",
+    backend: "https://tap-pin-pay-backend.vercel.app",
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || "development",
-    version: "2.0.0",
+    version: "2.1.0",
   })
 })
 
@@ -83,18 +89,18 @@ app.get("/api/health", async (req, res) => {
 
     res.json({
       status: "OK",
-      message: "Server is running perfectly!",
+      message: "🎉 Server is running perfectly!",
       database: dbConnected ? "✅ Connected" : "❌ Disconnected",
-      mongoUri: process.env.MONGODB_URI ? "✅ Configured" : "❌ Missing",
+      frontend: "https://tap-pin-pay-qorb.vercel.app",
+      backend: "https://tap-pin-pay-backend.vercel.app",
+      cors: "✅ Configured",
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || "development",
-      version: "2.0.0",
     })
   } catch (error) {
     res.status(500).json({
       status: "ERROR",
       message: "Health check failed",
-      database: "Error",
       error: error.message,
       timestamp: new Date().toISOString(),
     })
@@ -152,13 +158,11 @@ app.get("/api/products", async (req, res) => {
     const dbConnected = await connectDB()
 
     if (dbConnected) {
-      // Try to fetch from database
       try {
         const Product = require("./models/Product")
         const products = await Product.find({}).sort({ name: 1 })
 
         if (products.length > 0) {
-          // Convert to object format
           const productsObj = {}
           products.forEach((product) => {
             productsObj[product.id] = {
@@ -179,7 +183,7 @@ app.get("/api/products", async (req, res) => {
       }
     }
 
-    // Fallback to sample data
+    // Enhanced sample data
     const sampleProducts = {
       PROD001: {
         id: "PROD001",
@@ -261,7 +265,7 @@ app.get("/api/product/:id", async (req, res) => {
       }
     }
 
-    // Fallback to sample data
+    // Sample data fallback
     const sampleProducts = {
       PROD001: {
         id: "PROD001",
@@ -349,20 +353,18 @@ app.post("/api/orders", async (req, res) => {
       }
     }
 
-    // Fallback response
     res.status(201).json({
       message: "✅ Order processed successfully!",
       orderId: "ORD" + Date.now(),
       status: "completed",
       timestamp: new Date().toISOString(),
-      note: "Order processed with sample data",
     })
   } catch (error) {
     res.status(500).json({ error: "Failed to create order", details: error.message })
   }
 })
 
-// Test connection endpoint (keep for debugging)
+// Test connection endpoint
 app.get("/api/test-connection", async (req, res) => {
   try {
     const dbConnected = await connectDB()
@@ -374,6 +376,8 @@ app.get("/api/test-connection", async (req, res) => {
         host: mongoose.connection.host,
         database: mongoose.connection.name,
         readyState: mongoose.connection.readyState,
+        frontend: "https://tap-pin-pay-qorb.vercel.app",
+        backend: "https://tap-pin-pay-backend.vercel.app",
         timestamp: new Date().toISOString(),
       })
     } else {
@@ -406,6 +410,8 @@ app.use("*", (req, res) => {
       "GET /api/product/:id",
       "POST /api/orders",
     ],
+    frontend: "https://tap-pin-pay-qorb.vercel.app",
+    backend: "https://tap-pin-pay-backend.vercel.app",
     timestamp: new Date().toISOString(),
   })
 })

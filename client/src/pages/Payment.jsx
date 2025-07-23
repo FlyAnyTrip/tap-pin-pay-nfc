@@ -8,12 +8,15 @@ import { createOrder } from "../utils/productData.js"
 const Payment = () => {
   const { items, getTotal, clearCart } = useCart()
   const [isProcessing, setIsProcessing] = useState(false)
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("demo")
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("upi")
+  const [paymentStatus, setPaymentStatus] = useState(null) // 'success', 'failed', null
+  const [orderDetails, setOrderDetails] = useState(null)
+  const [errorMessage, setErrorMessage] = useState("")
   const navigate = useNavigate()
 
   // Calculate total in INR (₹1 per product for now)
   const getTotalINR = () => {
-    return items.reduce((total, item) => total + 1 * item.quantity, 0) // ₹1 per item
+    return items.reduce((total, item) => total + item.price * item.quantity, 0)
   }
 
   const getTaxINR = () => {
@@ -26,47 +29,63 @@ const Payment = () => {
 
   const handleUPIPayment = () => {
     const totalAmount = getFinalTotalINR()
-    const upiIntent = `upi://pay?pa=asinghvns99-2@okicici&pn=pay&am=${totalAmount}&tn=QR Scanner Purchase - Order ${Date.now()}&cu=INR`
+    const orderId = "ORD" + Date.now()
+    const upiIntent = `upi://pay?pa=asinghvns99-2@okicici&pn=QR Scanner Store&am=${totalAmount}&tn=Order ${orderId}&cu=INR`
 
     console.log("🔗 UPI Intent URL:", upiIntent)
 
-    // Try to open UPI intent
+    setIsProcessing(true)
+    setPaymentStatus(null)
+
     try {
+      // Try to open UPI intent
       window.location.href = upiIntent
 
       // Show processing state
-      setIsProcessing(true)
-
-      // Simulate payment completion after user returns
-      // In real app, you'd verify payment status via webhook/API
       setTimeout(() => {
-        if (window.confirm("Did you complete the UPI payment successfully?")) {
-          handlePaymentSuccess()
-        } else {
-          setIsProcessing(false)
-          alert("Payment cancelled. Please try again.")
-        }
+        // Simulate payment verification
+        showPaymentConfirmation(orderId, totalAmount)
       }, 3000)
     } catch (error) {
       console.error("Error opening UPI intent:", error)
-      alert("Unable to open UPI app. Please ensure you have a UPI app installed.")
+      handlePaymentFailure("Unable to open UPI app. Please ensure you have a UPI app installed.")
+    }
+  }
+
+  const showPaymentConfirmation = (orderId, amount) => {
+    // Create a modal-like confirmation
+    const confirmed = window.confirm(
+      `🔔 Payment Confirmation\n\n` +
+        `Order ID: ${orderId}\n` +
+        `Amount: ₹${amount}\n\n` +
+        `Did you complete the UPI payment successfully?\n\n` +
+        `✅ Click OK if payment was successful\n` +
+        `❌ Click Cancel if payment failed or was cancelled`,
+    )
+
+    if (confirmed) {
+      handlePaymentSuccess(orderId)
+    } else {
+      handlePaymentFailure("Payment was cancelled or failed. Please try again.")
     }
   }
 
   const handleDemoPayment = async () => {
     setIsProcessing(true)
+    setPaymentStatus(null)
 
     // Simulate demo payment processing
     setTimeout(() => {
-      handlePaymentSuccess()
+      const orderId = "DEMO" + Date.now()
+      handlePaymentSuccess(orderId)
     }, 2000)
   }
 
-  const handlePaymentSuccess = async () => {
+  const handlePaymentSuccess = async (orderId) => {
     try {
-      // Create order in database
-      const orderDetails = {
-        id: "ORD" + Date.now(),
+      // Create order details
+      const orderData = {
+        id: orderId,
         items: [...items],
         total: getTotalINR(),
         tax: getTaxINR(),
@@ -74,30 +93,269 @@ const Payment = () => {
         paymentMethod: selectedPaymentMethod === "upi" ? "UPI Payment" : "Demo Payment",
         status: "completed",
         currency: "INR",
+        transactionId: "TXN" + Date.now(),
+        paymentTime: new Date().toISOString(),
       }
 
       // Save to database
-      await createOrder(orderDetails)
+      await createOrder(orderData)
 
-      // Store order details in localStorage for invoice
+      // Store order details for invoice
       localStorage.setItem(
         "lastOrder",
         JSON.stringify({
-          ...orderDetails,
+          ...orderData,
           date: new Date().toISOString(),
         }),
       )
 
-      // Clear cart and redirect to invoice
+      // Set success state
+      setPaymentStatus("success")
+      setOrderDetails(orderData)
+      setIsProcessing(false)
+
+      // Clear cart after successful payment
       clearCart()
-      navigate("/invoice")
+
+      // Auto redirect to invoice after 3 seconds
+      setTimeout(() => {
+        navigate("/invoice")
+      }, 3000)
     } catch (error) {
       console.error("Error creating order:", error)
-      setIsProcessing(false)
-      alert("Error processing payment. Please try again.")
+      handlePaymentFailure("Error processing payment. Please contact support.")
     }
   }
 
+  const handlePaymentFailure = (message) => {
+    setPaymentStatus("failed")
+    setErrorMessage(message)
+    setIsProcessing(false)
+  }
+
+  const retryPayment = () => {
+    setPaymentStatus(null)
+    setErrorMessage("")
+    setIsProcessing(false)
+  }
+
+  const downloadInvoice = () => {
+    navigate("/invoice")
+  }
+
+  // Success Page
+  if (paymentStatus === "success") {
+    return (
+      <div className="container">
+        <div className="header" style={{ background: "linear-gradient(135deg, #4CAF50 0%, #45a049 100%)" }}>
+          <h1>✅ Payment Successful!</h1>
+          <p>Your order has been confirmed</p>
+        </div>
+
+        <div className="payment-container">
+          <div
+            style={{
+              textAlign: "center",
+              padding: "2rem",
+              background: "#d4edda",
+              border: "2px solid #c3e6cb",
+              borderRadius: "15px",
+              marginBottom: "2rem",
+            }}
+          >
+            <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>🎉</div>
+            <h2 style={{ color: "#155724", marginBottom: "1rem" }}>Payment Completed Successfully!</h2>
+            <p style={{ color: "#155724", fontSize: "18px", marginBottom: "1rem" }}>
+              Thank you for your order. Your payment has been processed.
+            </p>
+
+            {orderDetails && (
+              <div
+                style={{
+                  background: "white",
+                  padding: "1.5rem",
+                  borderRadius: "10px",
+                  margin: "1rem 0",
+                  border: "1px solid #c3e6cb",
+                }}
+              >
+                <h3 style={{ color: "#155724", marginBottom: "1rem" }}>Order Details</h3>
+                <div style={{ textAlign: "left", maxWidth: "400px", margin: "0 auto" }}>
+                  <p>
+                    <strong>Order ID:</strong> {orderDetails.id}
+                  </p>
+                  <p>
+                    <strong>Transaction ID:</strong> {orderDetails.transactionId}
+                  </p>
+                  <p>
+                    <strong>Amount Paid:</strong> ₹{orderDetails.finalTotal}
+                  </p>
+                  <p>
+                    <strong>Payment Method:</strong> {orderDetails.paymentMethod}
+                  </p>
+                  <p>
+                    <strong>Items:</strong> {orderDetails.items.length} items
+                  </p>
+                  <p>
+                    <strong>Status:</strong> ✅ Confirmed
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div style={{ marginTop: "2rem" }}>
+              <button
+                onClick={downloadInvoice}
+                style={{
+                  padding: "1rem 2rem",
+                  background: "#28a745",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "18px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  marginRight: "1rem",
+                  marginBottom: "1rem",
+                }}
+              >
+                📄 Download Invoice
+              </button>
+
+              <Link
+                to="/"
+                style={{
+                  padding: "1rem 2rem",
+                  background: "#007bff",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "18px",
+                  fontWeight: "bold",
+                  textDecoration: "none",
+                  display: "inline-block",
+                  marginBottom: "1rem",
+                }}
+              >
+                🛒 Continue Shopping
+              </Link>
+            </div>
+
+            <p style={{ fontSize: "14px", color: "#666", marginTop: "1rem" }}>
+              Redirecting to invoice page in 3 seconds...
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Failure Page
+  if (paymentStatus === "failed") {
+    return (
+      <div className="container">
+        <div className="header" style={{ background: "linear-gradient(135deg, #f44336 0%, #d32f2f 100%)" }}>
+          <h1>❌ Payment Failed</h1>
+          <p>There was an issue with your payment</p>
+        </div>
+
+        <div className="payment-container">
+          <div
+            style={{
+              textAlign: "center",
+              padding: "2rem",
+              background: "#f8d7da",
+              border: "2px solid #f5c6cb",
+              borderRadius: "15px",
+              marginBottom: "2rem",
+            }}
+          >
+            <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>😞</div>
+            <h2 style={{ color: "#721c24", marginBottom: "1rem" }}>Payment Could Not Be Processed</h2>
+            <p style={{ color: "#721c24", fontSize: "16px", marginBottom: "1rem" }}>{errorMessage}</p>
+
+            <div
+              style={{
+                background: "white",
+                padding: "1.5rem",
+                borderRadius: "10px",
+                margin: "1rem 0",
+                border: "1px solid #f5c6cb",
+              }}
+            >
+              <h3 style={{ color: "#721c24", marginBottom: "1rem" }}>What went wrong?</h3>
+              <ul style={{ textAlign: "left", color: "#721c24", maxWidth: "400px", margin: "0 auto" }}>
+                <li>UPI app may not be installed</li>
+                <li>Insufficient balance in account</li>
+                <li>Network connectivity issues</li>
+                <li>Payment was cancelled by user</li>
+                <li>UPI PIN entered incorrectly</li>
+              </ul>
+            </div>
+
+            <div style={{ marginTop: "2rem" }}>
+              <button
+                onClick={retryPayment}
+                style={{
+                  padding: "1rem 2rem",
+                  background: "#dc3545",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "18px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  marginRight: "1rem",
+                  marginBottom: "1rem",
+                }}
+              >
+                🔄 Retry Payment
+              </button>
+
+              <Link
+                to="/cart"
+                style={{
+                  padding: "1rem 2rem",
+                  background: "#6c757d",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "18px",
+                  fontWeight: "bold",
+                  textDecoration: "none",
+                  display: "inline-block",
+                  marginBottom: "1rem",
+                }}
+              >
+                🛒 Back to Cart
+              </Link>
+            </div>
+
+            <div
+              style={{
+                marginTop: "2rem",
+                padding: "1rem",
+                background: "#fff3cd",
+                border: "1px solid #ffeaa7",
+                borderRadius: "8px",
+                color: "#856404",
+              }}
+            >
+              <h4>💡 Try These Solutions:</h4>
+              <ul style={{ textAlign: "left", margin: "0.5rem 0" }}>
+                <li>Check your internet connection</li>
+                <li>Ensure UPI app is installed and working</li>
+                <li>Verify sufficient account balance</li>
+                <li>Try demo payment for testing</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Regular Payment Page (if no items)
   if (items.length === 0) {
     return (
       <div className="container">
@@ -117,6 +375,7 @@ const Payment = () => {
     )
   }
 
+  // Regular Payment Page
   return (
     <div className="container">
       <div className="header">
@@ -139,7 +398,7 @@ const Payment = () => {
               <span>
                 {item.name} x {item.quantity}
               </span>
-              <span>₹{(1 * item.quantity).toFixed(2)}</span>
+              <span>₹{(item.price * item.quantity).toFixed(2)}</span>
             </div>
           ))}
 
@@ -190,7 +449,7 @@ const Payment = () => {
                 onChange={() => setSelectedPaymentMethod("upi")}
                 style={{ marginRight: "0.5rem" }}
               />
-              <strong>📱 UPI Payment</strong>
+              <strong>📱 UPI Payment (Recommended)</strong>
             </div>
             <p style={{ fontSize: "14px", color: "#666", margin: "0", paddingLeft: "1.5rem" }}>
               Pay securely using any UPI app (PhonePe, Google Pay, Paytm, etc.)
@@ -241,7 +500,7 @@ const Payment = () => {
               background: "linear-gradient(135deg, #4CAF50 0%, #45a049 100%)",
             }}
           >
-            {isProcessing ? "🔄 Opening UPI App..." : `📱 Pay ₹${getFinalTotalINR()} via UPI`}
+            {isProcessing ? "🔄 Processing UPI Payment..." : `📱 Pay ₹${getFinalTotalINR()} via UPI`}
           </button>
         ) : (
           <button
@@ -293,9 +552,10 @@ const Payment = () => {
             <ol style={{ margin: "0", paddingLeft: "1.5rem", color: "#155724" }}>
               <li>Click the "Pay via UPI" button above</li>
               <li>Your UPI app will open automatically</li>
-              <li>Verify the payment details</li>
+              <li>Verify the payment details (Amount: ₹{getFinalTotalINR()})</li>
               <li>Enter your UPI PIN to complete payment</li>
               <li>Return to this page after payment</li>
+              <li>Confirm payment status when prompted</li>
             </ol>
           </div>
         )}

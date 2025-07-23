@@ -4,11 +4,12 @@ require("dotenv").config()
 
 const app = express()
 
-// Updated CORS with your actual frontend URL
+// Updated CORS with your new frontend URL
 app.use(
   cors({
     origin: [
-      "https://tap-pin-pay-qorb.vercel.app", // Your actual frontend URL
+      "https://alis-tap-pin-pay.vercel.app", // Your new frontend URL
+      "https://tap-pin-pay-qorb.vercel.app", // Old frontend URL (backup)
       "https://tap-pin-pay-backend.vercel.app", // Your backend URL
       "http://localhost:3000", // Local development
       /https:\/\/.*\.vercel\.app$/, // All Vercel apps for testing
@@ -74,12 +75,12 @@ app.get("/", (req, res) => {
   res.json({
     message: "🚀 QR Scanner API Server is running!",
     status: "OK",
-    frontend: "https://tap-pin-pay-qorb.vercel.app",
+    frontend: "https://alis-tap-pin-pay.vercel.app", // Updated frontend URL
     backend: "https://tap-pin-pay-backend.vercel.app",
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || "development",
-    version: "2.2.0",
-    features: ["UPI Payment", "Success/Failure Pages", "Invoice Generation", "Food Database"],
+    version: "2.3.0",
+    features: ["UPI Payment", "Success/Failure Pages", "Invoice Generation", "Food Database", "Audio Fixed"],
   })
 })
 
@@ -92,9 +93,9 @@ app.get("/api/health", async (req, res) => {
       status: "OK",
       message: "🎉 Server is running perfectly!",
       database: dbConnected ? "✅ Connected" : "❌ Disconnected",
-      frontend: "https://tap-pin-pay-qorb.vercel.app",
+      frontend: "https://alis-tap-pin-pay.vercel.app", // Updated frontend URL
       backend: "https://tap-pin-pay-backend.vercel.app",
-      cors: "✅ Configured",
+      cors: "✅ Configured with new frontend URL",
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || "development",
       features: {
@@ -103,6 +104,7 @@ app.get("/api/health", async (req, res) => {
         failurePage: "✅ Enabled",
         invoiceGeneration: "✅ Enabled",
         foodDatabase: "✅ Enabled",
+        audioFixed: "✅ Enabled",
       },
     })
   } catch (error) {
@@ -406,13 +408,14 @@ app.get("/api/test-connection", async (req, res) => {
         host: mongoose.connection.host,
         database: mongoose.connection.name,
         readyState: mongoose.connection.readyState,
-        frontend: "https://tap-pin-pay-qorb.vercel.app",
+        frontend: "https://alis-tap-pin-pay.vercel.app", // Updated frontend URL
         backend: "https://tap-pin-pay-backend.vercel.app",
         timestamp: new Date().toISOString(),
         features: {
           upiPayment: "✅ Ready",
           successFailurePages: "✅ Ready",
           invoiceGeneration: "✅ Ready",
+          audioFixed: "✅ Ready",
         },
       })
     } else {
@@ -445,7 +448,7 @@ app.use("*", (req, res) => {
       "GET /api/product/:id",
       "POST /api/orders",
     ],
-    frontend: "https://tap-pin-pay-qorb.vercel.app",
+    frontend: "https://alis-tap-pin-pay.vercel.app", // Updated frontend URL
     backend: "https://tap-pin-pay-backend.vercel.app",
     timestamp: new Date().toISOString(),
   })

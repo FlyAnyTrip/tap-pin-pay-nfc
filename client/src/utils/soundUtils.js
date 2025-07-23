@@ -1,39 +1,7 @@
-// Sound utility functions with custom audio file support
+// Enhanced sound utility functions with better error handling
 
-export const playBeepSound = () => {
-  try {
-    // Use custom success.mp3 file from public folder
-    const audio = new Audio("/success.mp3")
-    audio.volume = 0.5 // Set volume to 50%
-    audio.play().catch((error) => {
-      console.log("Error playing custom sound, falling back to generated beep:", error)
-      // Fallback to generated beep if file doesn't exist
-      playGeneratedBeep()
-    })
-  } catch (error) {
-    console.log("Audio file not supported, using generated beep")
-    playGeneratedBeep()
-  }
-}
-
-export const playSuccessSound = () => {
-  try {
-    // Use custom success.mp3 file for success sound too
-    const audio = new Audio("/success.mp3")
-    audio.volume = 0.7 // Slightly louder for success
-    audio.play().catch((error) => {
-      console.log("Error playing custom success sound, falling back to generated sound:", error)
-      // Fallback to generated success sound if file doesn't exist
-      playGeneratedSuccessSound()
-    })
-  } catch (error) {
-    console.log("Audio file not supported, using generated success sound")
-    playGeneratedSuccessSound()
-  }
-}
-
-// Fallback function for generated beep (original code)
-const playGeneratedBeep = () => {
+// Create a simple beep sound using Web Audio API
+const createBeepSound = (frequency = 800, duration = 0.3, volume = 0.3) => {
   try {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)()
     const oscillator = audioContext.createOscillator()
@@ -42,25 +10,26 @@ const playGeneratedBeep = () => {
     oscillator.connect(gainNode)
     gainNode.connect(audioContext.destination)
 
-    oscillator.frequency.value = 800
+    oscillator.frequency.value = frequency
     oscillator.type = "sine"
 
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5)
+    gainNode.gain.setValueAtTime(volume, audioContext.currentTime)
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration)
 
     oscillator.start(audioContext.currentTime)
-    oscillator.stop(audioContext.currentTime + 0.5)
+    oscillator.stop(audioContext.currentTime + duration)
+
+    return true
   } catch (error) {
-    console.log("Generated audio not supported")
+    console.log("Web Audio API not supported:", error)
+    return false
   }
 }
 
-// Fallback function for generated success sound (original code)
-const playGeneratedSuccessSound = () => {
+// Create success sound sequence
+const createSuccessSound = () => {
   try {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)()
-
-    // Play a sequence of notes for success
     const notes = [523.25, 659.25, 783.99] // C5, E5, G5
 
     notes.forEach((frequency, index) => {
@@ -80,18 +49,82 @@ const playGeneratedSuccessSound = () => {
       oscillator.start(startTime)
       oscillator.stop(startTime + 0.3)
     })
+
+    return true
   } catch (error) {
-    console.log("Generated audio not supported")
+    console.log("Web Audio API not supported:", error)
+    return false
   }
 }
 
-// Additional utility function to preload audio
+export const playBeepSound = () => {
+  try {
+    console.log("🔊 Playing beep sound...")
+
+    // Try to create beep sound using Web Audio API
+    const audioCreated = createBeepSound(800, 0.5, 0.3)
+
+    if (audioCreated) {
+      console.log("✅ Beep sound played successfully using Web Audio API")
+    } else {
+      console.log("⚠️ Web Audio API not available, using silent fallback")
+    }
+  } catch (error) {
+    console.log("❌ Error playing beep sound:", error)
+  }
+}
+
+export const playSuccessSound = () => {
+  try {
+    console.log("🎉 Playing success sound...")
+
+    // Try to create success sound using Web Audio API
+    const audioCreated = createSuccessSound()
+
+    if (audioCreated) {
+      console.log("✅ Success sound played successfully using Web Audio API")
+    } else {
+      console.log("⚠️ Web Audio API not available, using silent fallback")
+    }
+  } catch (error) {
+    console.log("❌ Error playing success sound:", error)
+  }
+}
+
+// Preload function (now just logs that audio is ready)
 export const preloadAudio = () => {
   try {
-    const audio = new Audio("/success.mp3")
-    audio.preload = "auto"
-    console.log("✅ Custom audio file preloaded")
+    // Test if Web Audio API is available
+    const AudioContext = window.AudioContext || window.webkitAudioContext
+    if (AudioContext) {
+      console.log("✅ Web Audio API available - sounds ready")
+      return true
+    } else {
+      console.log("⚠️ Web Audio API not available - using silent mode")
+      return false
+    }
   } catch (error) {
-    console.log("Could not preload custom audio file")
+    console.log("⚠️ Audio preload check failed:", error)
+    return false
+  }
+}
+
+// Test audio function
+export const testAudio = () => {
+  console.log("🧪 Testing audio capabilities...")
+
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext
+    if (AudioContext) {
+      console.log("✅ Web Audio API: Supported")
+      playBeepSound()
+      setTimeout(() => {
+        playSuccessSound()
+      }, 1000)
+    } else {
+      console.log("❌ Web Audio API: Not supported")
+    }
+  } catch (error) {
+    console.log("❌ Audio test failed:", error)
   }
 }

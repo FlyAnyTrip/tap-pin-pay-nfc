@@ -149,40 +149,40 @@ export const getOrderById = async (orderId) => {
 
 // Sample product data for offline fallback
 export const productDatabase = {
-  PROD001: {
-    id: "PROD001",
-    name: "Wireless Bluetooth Headphones",
-    price: 79.99,
-    image: "/placeholder.svg?height=100&width=100&text=Headphones",
-    description: "High-quality wireless headphones with noise cancellation",
+  FOOD001: {
+    id: "FOOD001",
+    name: "Vada Pav",
+    price: 25.0,
+    image: "/placeholder.svg?height=100&width=100&text=Vada+Pav",
+    description: "Mumbai's famous street food - spicy potato fritter in bun",
   },
-  PROD002: {
-    id: "PROD002",
-    name: "Smart Phone Case",
-    price: 24.99,
-    image: "/placeholder.svg?height=100&width=100&text=Phone+Case",
-    description: "Protective case with wireless charging support",
+  FOOD002: {
+    id: "FOOD002",
+    name: "Pav Bhaji",
+    price: 60.0,
+    image: "/placeholder.svg?height=100&width=100&text=Pav+Bhaji",
+    description: "Spicy vegetable curry served with buttered bread rolls",
   },
-  PROD003: {
-    id: "PROD003",
-    name: "USB-C Cable",
-    price: 12.99,
-    image: "/placeholder.svg?height=100&width=100&text=USB+Cable",
-    description: "Fast charging USB-C cable, 6ft length",
+  FOOD003: {
+    id: "FOOD003",
+    name: "Dosa",
+    price: 45.0,
+    image: "/placeholder.svg?height=100&width=100&text=Dosa",
+    description: "Crispy South Indian crepe served with sambar and chutney",
   },
-  PROD004: {
-    id: "PROD004",
-    name: "Portable Power Bank",
-    price: 39.99,
-    image: "/placeholder.svg?height=100&width=100&text=Power+Bank",
-    description: "10000mAh portable charger with fast charging",
+  FOOD004: {
+    id: "FOOD004",
+    name: "Biryani",
+    price: 120.0,
+    image: "/placeholder.svg?height=100&width=100&text=Biryani",
+    description: "Aromatic basmati rice with spiced chicken/mutton",
   },
-  PROD005: {
-    id: "PROD005",
-    name: "Wireless Mouse",
-    price: 29.99,
-    image: "/placeholder.svg?height=100&width=100&text=Mouse",
-    description: "Ergonomic wireless mouse with precision tracking",
+  FOOD005: {
+    id: "FOOD005",
+    name: "Samosa",
+    price: 15.0,
+    image: "/placeholder.svg?height=100&width=100&text=Samosa",
+    description: "Crispy triangular pastry filled with spiced potatoes",
   },
 }
 

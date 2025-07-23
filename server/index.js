@@ -1,6 +1,5 @@
 const express = require("express")
 const cors = require("cors")
-const path = require("path")
 require("dotenv").config()
 
 // Import database connection
@@ -11,22 +10,21 @@ const productController = require("./controllers/productController")
 const orderController = require("./controllers/orderController")
 
 const app = express()
-const PORT = process.env.PORT || 5000
 
 // Middleware
 app.use(
   cors({
     origin: [
-      "https://qr-scanner-client-xyz.vercel.app", // Replace with your actual client URL after deployment
-      "http://localhost:3000", // Keep for local development
-      /https:\/\/.*\.vercel\.app$/, // Allow all vercel apps for testing
+      "https://tap-pin-pay-frontend.vercel.app", // Your client URL
+      "http://localhost:3000",
+      /https:\/\/.*\.vercel\.app$/,
     ],
     credentials: true,
   }),
 )
 app.use(express.json())
 
-// Connect to MongoDB for each request in serverless environment
+// Connect to MongoDB
 app.use(async (req, res, next) => {
   try {
     await connectDB()
@@ -37,7 +35,25 @@ app.use(async (req, res, next) => {
   }
 })
 
+// Root route for testing
+app.get("/", (req, res) => {
+  res.json({
+    message: "QR Scanner API Server is running!",
+    status: "OK",
+    timestamp: new Date().toISOString(),
+  })
+})
+
 // API Routes
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "OK",
+    message: "Server is running with MongoDB",
+    database: "MongoDB",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || "development",
+  })
+})
 
 // Product routes
 app.get("/api/products", productController.getAllProducts)
@@ -52,18 +68,7 @@ app.get("/api/order/:id", orderController.getOrderById)
 app.get("/api/orders", orderController.getAllOrders)
 app.put("/api/order/:id/status", orderController.updateOrderStatus)
 
-// Health check endpoint
-app.get("/api/health", (req, res) => {
-  res.json({
-    status: "OK",
-    message: "Server is running with MongoDB",
-    database: "MongoDB",
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || "development",
-  })
-})
-
-// Test database connection endpoint
+// Database status
 app.get("/api/db-status", async (req, res) => {
   const mongoose = require("mongoose")
   res.json({
@@ -74,15 +79,21 @@ app.get("/api/db-status", async (req, res) => {
   })
 })
 
-// For Vercel serverless functions
-if (process.env.NODE_ENV === "production") {
-  // Export the Express app as a serverless function
-  module.exports = app
-} else {
-  // For local development
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
-    console.log(`Database: MongoDB`)
-    console.log(`API endpoints available at http://localhost:${PORT}/api/`)
+// 404 handler
+app.use("*", (req, res) => {
+  res.status(404).json({
+    error: "Route not found",
+    message: `Cannot ${req.method} ${req.originalUrl}`,
+    availableRoutes: [
+      "GET /",
+      "GET /api/health",
+      "GET /api/products",
+      "GET /api/product/:id",
+      "POST /api/products",
+      "POST /api/orders",
+    ],
   })
-}
+})
+
+// Export for Vercel
+module.exports = app

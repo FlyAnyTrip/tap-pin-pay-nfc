@@ -1,10 +1,10 @@
-// Replace with your ACTUAL backend URL
+// Your deployed backend URL
 const API_BASE_URL = "https://tap-pin-pay-nfc-backend.vercel.app/api"
 
 // Test API connection on load
 const testConnection = async () => {
   try {
-    console.log("🔄 Testing API connection...")
+    console.log("🔄 Testing API connection to:", API_BASE_URL)
     const response = await fetch(`${API_BASE_URL}/health`)
     if (response.ok) {
       const result = await response.json()

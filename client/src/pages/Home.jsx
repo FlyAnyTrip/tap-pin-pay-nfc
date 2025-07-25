@@ -214,19 +214,21 @@
 
 
 
-"use client"
+// "use client"
 
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import QRScannerComponent from "../components/QRScanner.jsx"
 import ManualProductEntry from "../components/ManualProductEntry.jsx"
 import { useCart } from "../utils/CartContext.jsx"
+import NFCReaderComponent from "../components/NFCReader.jsx"
 
 const Home = () => {
   const { getItemCount, items, clearCart } = useCart()
   const [isScannerActive, setIsScannerActive] = useState(true)
   const [lastAddedProduct, setLastAddedProduct] = useState(null)
   const [showManualEntry, setShowManualEntry] = useState(false)
+  const [scanMode, setScanMode] = useState("qr") // "qr" or "nfc"
 
   const handleProductAdded = (product) => {
     setLastAddedProduct(product)
@@ -271,6 +273,23 @@ const Home = () => {
             View Cart & Checkout
           </Link>
         )}
+        <Link to="/nfc-manager" className="nav-btn" style={{ background: "#9C27B0" }}>
+          📱 NFC Manager
+        </Link>
+        <button
+          onClick={() => setScanMode("qr")}
+          className="nav-btn"
+          style={{ background: scanMode === "qr" ? "#4CAF50" : "#2196f3" }}
+        >
+          {scanMode === "qr" ? "📷 QR Active" : "📷 QR Scanner"}
+        </button>
+        <button
+          onClick={() => setScanMode("nfc")}
+          className="nav-btn"
+          style={{ background: scanMode === "nfc" ? "#4CAF50" : "#FF9800" }}
+        >
+          {scanMode === "nfc" ? "📱 NFC Active" : "📱 NFC Reader"}
+        </button>
         <button
           onClick={toggleManualEntry}
           className="nav-btn"
@@ -323,11 +342,13 @@ const Home = () => {
         </div>
       )}
 
-      {/* Manual Product Entry or QR Scanner */}
+      {/* Manual Product Entry, QR Scanner, or NFC Reader */}
       {showManualEntry ? (
         <ManualProductEntry onProductAdded={handleProductAdded} />
-      ) : (
+      ) : scanMode === "qr" ? (
         <QRScannerComponent isActive={isScannerActive} onProductAdded={handleProductAdded} />
+      ) : (
+        <NFCReaderComponent isActive={isScannerActive} onProductAdded={handleProductAdded} />
       )}
 
       <div
@@ -349,9 +370,9 @@ const Home = () => {
             <li>Or enter a Product ID manually and click "Add to Cart"</li>
             <li>Use search and category filters to find products easily</li>
             <li>Use +/- buttons in cart to change quantities</li>
-            <li>Switch to scanner mode for QR code scanning</li>
+            <li>Switch to scanner mode for QR code or NFC scanning</li>
           </ol>
-        ) : (
+        ) : scanMode === "qr" ? (
           <ol style={{ textAlign: "left", maxWidth: "400px", margin: "1rem auto" }}>
             <li>Point your camera at a QR code</li>
             <li>Wait for the green animation and beep sound</li>
@@ -359,6 +380,15 @@ const Home = () => {
             <li>Duplicate scans of same product are ignored</li>
             <li>Use +/- buttons in cart to change quantities</li>
             <li>Click "Add More Products" to scan additional items</li>
+          </ol>
+        ) : (
+          <ol style={{ textAlign: "left", maxWidth: "400px", margin: "1rem auto" }}>
+            <li>Hold your device near an NFC tag</li>
+            <li>Wait for the blue animation and beep sound</li>
+            <li>Product will be added to cart automatically</li>
+            <li>Duplicate taps of same product are ignored</li>
+            <li>Use +/- buttons in cart to change quantities</li>
+            <li>Click "Add More Products" to read additional tags</li>
           </ol>
         )}
 

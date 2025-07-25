@@ -4,6 +4,7 @@ import Home from "./pages/Home.jsx"
 import Cart from "./pages/Cart.jsx"
 import Payment from "./pages/Payment.jsx"
 import Invoice from "./pages/Invoice.jsx"
+import NFCManager from "./pages/NFCManager.jsx"
 import "./App.css"
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/invoice" element={<Invoice />} />
+            <Route path="/nfc-manager" element={<NFCManager />} />
           </Routes>
         </div>
       </Router>

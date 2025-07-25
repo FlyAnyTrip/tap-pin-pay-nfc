@@ -3,7 +3,6 @@ const Product = require("../models/Product")
 require("dotenv").config()
 
 const sampleProducts = [
-  // Electronics
   {
     id: "PROD001",
     name: "Wireless Bluetooth Headphones",
@@ -31,147 +30,6 @@ const sampleProducts = [
     category: "Cables",
     stock: 200,
   },
-
-  // Food Items - Indian Street Food
-  {
-    id: "FOOD001",
-    name: "Vada Pav",
-    price: 25.0,
-    image: "/placeholder.svg?height=100&width=100&text=Vada+Pav",
-    description: "Mumbai's famous street food - spicy potato fritter in bun",
-    category: "Street Food",
-    stock: 50,
-  },
-  {
-    id: "FOOD002",
-    name: "Pav Bhaji",
-    price: 60.0,
-    image: "/placeholder.svg?height=100&width=100&text=Pav+Bhaji",
-    description: "Spicy vegetable curry served with buttered bread rolls",
-    category: "Street Food",
-    stock: 30,
-  },
-  {
-    id: "FOOD003",
-    name: "Dosa",
-    price: 45.0,
-    image: "/placeholder.svg?height=100&width=100&text=Dosa",
-    description: "Crispy South Indian crepe served with sambar and chutney",
-    category: "South Indian",
-    stock: 40,
-  },
-  {
-    id: "FOOD004",
-    name: "Biryani",
-    price: 120.0,
-    image: "/images/biryani.jpg",  
-    description: "Aromatic basmati rice with spiced chicken/mutton",
-    category: "Main Course",
-    stock: 25,
-  },
-  {
-    id: "FOOD005",
-    name: "Samosa",
-    price: 15.0,
-    image: "/placeholder.svg?height=100&width=100&text=Samosa",
-    description: "Crispy triangular pastry filled with spiced potatoes",
-    category: "Snacks",
-    stock: 100,
-  },
-  {
-    id: "FOOD006",
-    name: "Chole Bhature",
-    price: 80.0,
-    image: "/placeholder.svg?height=100&width=100&text=Chole+Bhature",
-    description: "Spicy chickpea curry with fluffy fried bread",
-    category: "North Indian",
-    stock: 20,
-  },
-  {
-    id: "FOOD007",
-    name: "Masala Chai",
-    price: 10.0,
-    image: "/placeholder.svg?height=100&width=100&text=Masala+Chai",
-    description: "Traditional Indian spiced tea",
-    category: "Beverages",
-    stock: 200,
-  },
-  {
-    id: "FOOD008",
-    name: "Paneer Tikka",
-    price: 90.0,
-    image: "/placeholder.svg?height=100&width=100&text=Paneer+Tikka",
-    description: "Grilled cottage cheese cubes with spices",
-    category: "Appetizers",
-    stock: 35,
-  },
-  {
-    id: "FOOD009",
-    name: "Butter Chicken",
-    price: 150.0,
-    image: "/placeholder.svg?height=100&width=100&text=Butter+Chicken",
-    description: "Creamy tomato-based chicken curry",
-    category: "Main Course",
-    stock: 30,
-  },
-  {
-    id: "FOOD010",
-    name: "Gulab Jamun",
-    price: 40.0,
-    image: "/placeholder.svg?height=100&width=100&text=Gulab+Jamun",
-    description: "Sweet milk dumplings in sugar syrup",
-    category: "Desserts",
-    stock: 60,
-  },
-
-  // Fast Food
-  {
-    id: "FOOD011",
-    name: "Pizza Margherita",
-    price: 180.0,
-    image: "/placeholder.svg?height=100&width=100&text=Pizza",
-    description: "Classic pizza with tomato sauce, mozzarella and basil",
-    category: "Fast Food",
-    stock: 25,
-  },
-  {
-    id: "FOOD012",
-    name: "Chicken Burger",
-    price: 120.0,
-    image: "/placeholder.svg?height=100&width=100&text=Burger",
-    description: "Juicy chicken patty with lettuce, tomato and mayo",
-    category: "Fast Food",
-    stock: 40,
-  },
-  {
-    id: "FOOD013",
-    name: "French Fries",
-    price: 50.0,
-    image: "/placeholder.svg?height=100&width=100&text=Fries",
-    description: "Crispy golden potato fries with salt",
-    category: "Sides",
-    stock: 80,
-  },
-  {
-    id: "FOOD014",
-    name: "Cold Coffee",
-    price: 60.0,
-    image: "/placeholder.svg?height=100&width=100&text=Cold+Coffee",
-    description: "Refreshing iced coffee with milk and sugar",
-    category: "Beverages",
-    stock: 50,
-  },
-  {
-    id: "FOOD015",
-    name: "Chocolate Shake",
-    price: 80.0,
-    image: "/placeholder.svg?height=100&width=100&text=Shake",
-    description: "Rich chocolate milkshake with whipped cream",
-    category: "Beverages",
-    stock: 30,
-  },
-
-  // Electronics (keeping some original items)
   {
     id: "PROD004",
     name: "Portable Power Bank",
@@ -190,19 +48,43 @@ const sampleProducts = [
     category: "Computer Accessories",
     stock: 120,
   },
+  {
+    id: "PROD006",
+    name: "Smart Watch",
+    price: 199.99,
+    image: "/placeholder.svg?height=100&width=100&text=Smart+Watch",
+    description: "Fitness tracking smartwatch with heart rate monitor",
+    category: "Wearables",
+    stock: 30,
+  },
+  {
+    id: "PROD007",
+    name: "Bluetooth Speaker",
+    price: 49.99,
+    image: "/placeholder.svg?height=100&width=100&text=Speaker",
+    description: "Portable Bluetooth speaker with premium sound",
+    category: "Audio",
+    stock: 60,
+  },
+  {
+    id: "PROD008",
+    name: "Laptop Stand",
+    price: 34.99,
+    image: "/placeholder.svg?height=100&width=100&text=Laptop+Stand",
+    description: "Adjustable aluminum laptop stand for better ergonomics",
+    category: "Accessories",
+    stock: 40,
+  },
 ]
 
 const seedDatabase = async () => {
   try {
     console.log("🚀 Starting database seeding process...")
 
-    // Connect to MongoDB Atlas
-    const mongoURI = process.env.MONGODB_URI
-
-    if (!mongoURI) {
-      console.error("❌ MONGODB_URI environment variable not found!")
-      process.exit(1)
-    }
+    // Connect to your MongoDB Atlas database
+    const mongoURI =
+      process.env.MONGODB_URI ||
+      "mongodb+srv://alispatel1112003:eRu2Kpql6QWXajHA@cluster0.cke1m7w.mongodb.net/pin-tap-pay?retryWrites=true&w=majority&appName=Cluster0"
 
     await mongoose.connect(mongoURI, {
       useNewUrlParser: true,
@@ -212,20 +94,14 @@ const seedDatabase = async () => {
     console.log("✅ Connected to MongoDB Atlas")
     console.log(`📊 Database: ${mongoose.connection.name}`)
 
-    // Check existing products
+    // Check if products already exist
     const existingProducts = await Product.countDocuments()
     console.log(`📦 Existing products in database: ${existingProducts}`)
 
     if (existingProducts > 0) {
-      console.log("⚠️  Products already exist. Do you want to:")
-      console.log("1. Clear existing and add new products")
-      console.log("2. Add new products without clearing")
-      console.log("3. Exit without changes")
-
-      // For automated seeding, we'll clear and add new
-      console.log("🗑️  Clearing existing products...")
+      console.log("⚠️  Products already exist. Clearing existing products...")
       await Product.deleteMany({})
-      console.log("✅ Cleared existing products")
+      console.log("🗑️  Cleared existing products")
     }
 
     // Insert sample products
@@ -241,7 +117,6 @@ const seedDatabase = async () => {
 
     console.log("\n🎉 Database seeded successfully!")
     console.log("🔗 You can now test with QR codes: PROD001, PROD002, PROD003, etc.")
-    console.log(`🌐 Test your API: https://tap-pin-pay-backend.vercel.app/api/products`)
 
     process.exit(0)
   } catch (error) {
@@ -250,9 +125,4 @@ const seedDatabase = async () => {
   }
 }
 
-// Run if called directly
-if (require.main === module) {
-  seedDatabase()
-}
-
-module.exports = seedDatabase
+seedDatabase()

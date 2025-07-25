@@ -52,7 +52,7 @@ app.get("/api/order/:id", orderController.getOrderById)
 app.get("/api/orders", orderController.getAllOrders)
 app.put("/api/order/:id/status", orderController.updateOrderStatus)
 
-// Seed database endpoint (for manual seeding) - UPDATED WITH IMAGES
+// Seed database endpoint (for manual seeding)
 app.post("/api/seed", async (req, res) => {
   try {
     const sampleProducts = [
@@ -60,7 +60,7 @@ app.post("/api/seed", async (req, res) => {
         id: "FOOD001",
         name: "Vada Pav",
         price: 25.0,
-        image: "/images/vada-pav.jpg", // ✅ Real image path
+        image: "/placeholder.svg?height=100&width=100&text=Vada+Pav",
         description: "Mumbai's famous street food - spicy potato fritter in bun",
         category: "Street Food",
         stock: 50,
@@ -69,7 +69,7 @@ app.post("/api/seed", async (req, res) => {
         id: "FOOD002",
         name: "Pav Bhaji",
         price: 60.0,
-        image: "/images/pav-bhaji.jpg", // ✅ Real image path
+        image: "/placeholder.svg?height=100&width=100&text=Pav+Bhaji",
         description: "Spicy vegetable curry served with buttered bread rolls",
         category: "Street Food",
         stock: 30,
@@ -78,7 +78,7 @@ app.post("/api/seed", async (req, res) => {
         id: "FOOD003",
         name: "Dosa",
         price: 45.0,
-        image: "/images/dosa.jpg", // ✅ Real image path
+        image: "/placeholder.svg?height=100&width=100&text=Dosa",
         description: "Crispy South Indian crepe served with sambar and chutney",
         category: "South Indian",
         stock: 40,
@@ -87,7 +87,7 @@ app.post("/api/seed", async (req, res) => {
         id: "FOOD004",
         name: "Biryani",
         price: 120.0,
-        image: "/images/biryani.jpg", // ✅ Real image path
+        image: "/placeholder.svg?height=100&width=100&text=Biryani",
         description: "Aromatic basmati rice with spiced chicken/mutton",
         category: "Main Course",
         stock: 25,
@@ -96,7 +96,7 @@ app.post("/api/seed", async (req, res) => {
         id: "FOOD005",
         name: "Samosa",
         price: 15.0,
-        image: "/images/samosa.jpg", // ✅ Real image path
+        image: "/placeholder.svg?height=100&width=100&text=Samosa",
         description: "Crispy triangular pastry filled with spiced potatoes",
         category: "Snacks",
         stock: 100,
@@ -110,9 +110,9 @@ app.post("/api/seed", async (req, res) => {
     const insertedProducts = await Product.insertMany(sampleProducts)
 
     res.json({
-      message: "Database seeded successfully with real images",
+      message: "Database seeded successfully",
       count: insertedProducts.length,
-      products: insertedProducts.map((p) => ({ id: p.id, name: p.name, image: p.image })),
+      products: insertedProducts.map((p) => ({ id: p.id, name: p.name })),
     })
   } catch (error) {
     console.error("Seeding error:", error)
@@ -170,6 +170,3 @@ if (require.main === module) {
     console.log(`API endpoints available at http://localhost:${PORT}/api/`)
   })
 }
-
-
-

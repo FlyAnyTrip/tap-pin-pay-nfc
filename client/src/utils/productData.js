@@ -147,13 +147,13 @@ export const getOrderById = async (orderId) => {
   }
 }
 
-// Sample product data for offline fallback
+// Updated product data with real image paths
 export const productDatabase = {
   FOOD001: {
     id: "FOOD001",
     name: "Vada Pav",
     price: 25.0,
-    image: "/placeholder.svg?height=100&width=100&text=Vada+Pav",
+    image: "/images/vada-pav.jpg", // ✅ Real image path
     description: "Mumbai's famous street food - spicy potato fritter in bun",
     category: "Street Food",
   },
@@ -161,7 +161,7 @@ export const productDatabase = {
     id: "FOOD002",
     name: "Pav Bhaji",
     price: 60.0,
-    image: "/placeholder.svg?height=100&width=100&text=Pav+Bhaji",
+    image: "/images/pav-bhaji.jpg", // ✅ Real image path
     description: "Spicy vegetable curry served with buttered bread rolls",
     category: "Street Food",
   },
@@ -169,7 +169,7 @@ export const productDatabase = {
     id: "FOOD003",
     name: "Dosa",
     price: 45.0,
-    image: "/placeholder.svg?height=100&width=100&text=Dosa",
+    image: "/images/dosa.jpg", // ✅ Real image path
     description: "Crispy South Indian crepe served with sambar and chutney",
     category: "South Indian",
   },
@@ -177,7 +177,7 @@ export const productDatabase = {
     id: "FOOD004",
     name: "Biryani",
     price: 120.0,
-    image: "/placeholder.svg?height=100&width=100&text=Biryani",
+    image: "/images/biryani.jpg", // ✅ Real image path
     description: "Aromatic basmati rice with spiced chicken/mutton",
     category: "Main Course",
   },
@@ -185,7 +185,7 @@ export const productDatabase = {
     id: "FOOD005",
     name: "Samosa",
     price: 15.0,
-    image: "/placeholder.svg?height=100&width=100&text=Samosa",
+    image: "/images/samosa.jpg", // ✅ Real image path
     description: "Crispy triangular pastry filled with spiced potatoes",
     category: "Snacks",
   },

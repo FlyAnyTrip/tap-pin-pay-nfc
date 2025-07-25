@@ -1,5 +1,5 @@
-// Updated API configuration with your actual backend URL
-const API_BASE_URL = "https://tap-pin-pay-backend.vercel.app/api"
+// Replace with your ACTUAL backend URL
+const API_BASE_URL = "https://tap-pin-pay-nfc-backend.vercel.app/api"
 
 // Test API connection on load
 const testConnection = async () => {
@@ -29,7 +29,7 @@ export const getProductById = async (id) => {
     const response = await fetch(`${API_BASE_URL}/product/${id}`)
     if (response.ok) {
       const product = await response.json()
-      console.log("✅ Product fetched successfully:", product)
+      console.log("✅ Product found:", product)
       return product
     } else {
       console.log("❌ Product not found:", response.status)
@@ -155,6 +155,7 @@ export const productDatabase = {
     price: 25.0,
     image: "/placeholder.svg?height=100&width=100&text=Vada+Pav",
     description: "Mumbai's famous street food - spicy potato fritter in bun",
+    category: "Street Food",
   },
   FOOD002: {
     id: "FOOD002",
@@ -162,6 +163,7 @@ export const productDatabase = {
     price: 60.0,
     image: "/placeholder.svg?height=100&width=100&text=Pav+Bhaji",
     description: "Spicy vegetable curry served with buttered bread rolls",
+    category: "Street Food",
   },
   FOOD003: {
     id: "FOOD003",
@@ -169,6 +171,7 @@ export const productDatabase = {
     price: 45.0,
     image: "/placeholder.svg?height=100&width=100&text=Dosa",
     description: "Crispy South Indian crepe served with sambar and chutney",
+    category: "South Indian",
   },
   FOOD004: {
     id: "FOOD004",
@@ -176,6 +179,7 @@ export const productDatabase = {
     price: 120.0,
     image: "/placeholder.svg?height=100&width=100&text=Biryani",
     description: "Aromatic basmati rice with spiced chicken/mutton",
+    category: "Main Course",
   },
   FOOD005: {
     id: "FOOD005",
@@ -183,6 +187,7 @@ export const productDatabase = {
     price: 15.0,
     image: "/placeholder.svg?height=100&width=100&text=Samosa",
     description: "Crispy triangular pastry filled with spiced potatoes",
+    category: "Snacks",
   },
 }
 

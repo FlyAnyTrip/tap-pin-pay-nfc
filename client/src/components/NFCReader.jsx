@@ -179,22 +179,62 @@ const NFCReaderComponent = ({ isActive = true, onProductAdded }) => {
 
         if (record.recordType === "text") {
           try {
-            // Handle text record - decode properly
+            // Improved text record decoding
             const textDecoder = new TextDecoder("utf-8")
-            // Skip the first 3 bytes (language code info) for NDEF text records
-            const textData = record.data.slice(3)
-            const text = textDecoder.decode(textData)
-            console.log("📄 NFC Text content:", text)
+            let text = ""
 
-            // Check if it's a product ID format (FOOD001, PROD001, etc.)
-            const productMatch = text.match(/^(FOOD|PROD)\d{3}$/i)
+            // Handle different text record formats
+            if (record.data.byteLength > 0) {
+              // Check if it's a proper NDEF text record (starts with language code)
+              const firstByte = new Uint8Array(record.data)[0]
+
+              if (firstByte < 32) {
+                // Likely has language code prefix, skip it
+                const languageCodeLength = firstByte & 0x3f
+                const textData = record.data.slice(1 + languageCodeLength)
+                text = textDecoder.decode(textData)
+              } else {
+                // Direct text data
+                text = textDecoder.decode(record.data)
+              }
+            }
+
+            console.log("📄 Decoded NFC text:", text)
+
+            // Clean up the text and check for product ID format
+            const cleanText = text.trim().toUpperCase()
+
+            // Check if it matches product ID format (FOOD001, PROD001, etc.)
+            const productMatch = cleanText.match(/^(FOOD|PROD)\d{3}$/i)
             if (productMatch) {
-              productId = text.toUpperCase()
+              productId = cleanText
               console.log("✅ Found product ID in text:", productId)
+              break
+            }
+
+            // Also try to extract from longer text (in case there's extra info)
+            const extractMatch = cleanText.match(/(FOOD|PROD)\d{3}/i)
+            if (extractMatch) {
+              productId = extractMatch[0].toUpperCase()
+              console.log("✅ Extracted product ID from text:", productId)
               break
             }
           } catch (decodeError) {
             console.error("Error decoding text record:", decodeError)
+
+            // Fallback: try raw bytes as ASCII
+            try {
+              const rawText = String.fromCharCode(...new Uint8Array(record.data))
+              console.log("📄 Raw text fallback:", rawText)
+              const fallbackMatch = rawText.match(/(FOOD|PROD)\d{3}/i)
+              if (fallbackMatch) {
+                productId = fallbackMatch[0].toUpperCase()
+                console.log("✅ Found product ID in raw text:", productId)
+                break
+              }
+            } catch (rawError) {
+              console.error("Raw text fallback failed:", rawError)
+            }
           }
         } else if (record.recordType === "url") {
           try {

@@ -52,71 +52,19 @@ app.get("/api/order/:id", orderController.getOrderById)
 app.get("/api/orders", orderController.getAllOrders)
 app.put("/api/order/:id/status", orderController.updateOrderStatus)
 
-// Seed database endpoint (for manual seeding)
+// Simple seed endpoint - runs the seed script
 app.post("/api/seed", async (req, res) => {
   try {
-    const sampleProducts = [
-      {
-        id: "FOOD001",
-        name: "Vada Pav",
-        price: 25.0,
-        image: "/placeholder.svg?height=100&width=100&text=Vada+Pav",
-        description: "Mumbai's famous street food - spicy potato fritter in bun",
-        category: "Street Food",
-        stock: 50,
-      },
-      {
-        id: "FOOD002",
-        name: "Pav Bhaji",
-        price: 60.0,
-        image: "/placeholder.svg?height=100&width=100&text=Pav+Bhaji",
-        description: "Spicy vegetable curry served with buttered bread rolls",
-        category: "Street Food",
-        stock: 30,
-      },
-      {
-        id: "FOOD003",
-        name: "Dosa",
-        price: 45.0,
-        image: "/placeholder.svg?height=100&width=100&text=Dosa",
-        description: "Crispy South Indian crepe served with sambar and chutney",
-        category: "South Indian",
-        stock: 40,
-      },
-      {
-        id: "FOOD004",
-        name: "Biryani",
-        price: 120.0,
-        image: "/placeholder.svg?height=100&width=100&text=Biryani",
-        description: "Aromatic basmati rice with spiced chicken/mutton",
-        category: "Main Course",
-        stock: 25,
-      },
-      {
-        id: "FOOD005",
-        name: "Samosa",
-        price: 15.0,
-        image: "/placeholder.svg?height=100&width=100&text=Samosa",
-        description: "Crispy triangular pastry filled with spiced potatoes",
-        category: "Snacks",
-        stock: 100,
-      },
-    ]
-
     // Clear existing products
     await Product.deleteMany({})
 
-    // Insert sample products
-    const insertedProducts = await Product.insertMany(sampleProducts)
-
     res.json({
-      message: "Database seeded successfully",
-      count: insertedProducts.length,
-      products: insertedProducts.map((p) => ({ id: p.id, name: p.name })),
+      message: "Database cleared successfully. Please run the seed script manually to add products.",
+      instruction: "Run: node server/scripts/seed-database.js",
     })
   } catch (error) {
     console.error("Seeding error:", error)
-    res.status(500).json({ error: "Failed to seed database" })
+    res.status(500).json({ error: "Failed to clear database" })
   }
 })
 
@@ -139,6 +87,30 @@ app.get("/api/db-status", async (req, res) => {
     host: mongoose.connection.host,
     name: mongoose.connection.name,
   })
+})
+
+// Get product count by category
+app.get("/api/stats", async (req, res) => {
+  try {
+    const products = await Product.find({})
+    const categories = {}
+
+    products.forEach((product) => {
+      if (categories[product.category]) {
+        categories[product.category]++
+      } else {
+        categories[product.category] = 1
+      }
+    })
+
+    res.json({
+      totalProducts: products.length,
+      categories: categories,
+      message: "Database statistics",
+    })
+  } catch (error) {
+    res.status(500).json({ error: "Failed to get stats" })
+  }
 })
 
 // 404 handler

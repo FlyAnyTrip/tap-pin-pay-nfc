@@ -37,8 +37,7 @@ export const getProductById = async (id) => {
     }
   } catch (error) {
     console.error("❌ Error fetching product:", error)
-    // Fallback to local data if API fails
-    return productDatabase[id] || null
+    return null
   }
 }
 
@@ -52,11 +51,11 @@ export const getAllProducts = async () => {
       return products
     } else {
       console.log("❌ Failed to fetch products:", response.status)
-      return productDatabase
+      return {}
     }
   } catch (error) {
     console.error("❌ Error fetching products:", error)
-    return productDatabase
+    return {}
   }
 }
 
@@ -145,50 +144,6 @@ export const getOrderById = async (orderId) => {
     console.error("❌ Error fetching order:", error)
     return null
   }
-}
-
-// Sample product data for offline fallback
-export const productDatabase = {
-  FOOD001: {
-    id: "FOOD001",
-    name: "Vada Pav",
-    price: 25.0,
-    image: "/placeholder.svg?height=100&width=100&text=Vada+Pav",
-    description: "Mumbai's famous street food - spicy potato fritter in bun",
-    category: "Street Food",
-  },
-  FOOD002: {
-    id: "FOOD002",
-    name: "Pav Bhaji",
-    price: 60.0,
-    image: "/placeholder.svg?height=100&width=100&text=Pav+Bhaji",
-    description: "Spicy vegetable curry served with buttered bread rolls",
-    category: "Street Food",
-  },
-  FOOD003: {
-    id: "FOOD003",
-    name: "Dosa",
-    price: 45.0,
-    image: "/placeholder.svg?height=100&width=100&text=Dosa",
-    description: "Crispy South Indian crepe served with sambar and chutney",
-    category: "South Indian",
-  },
-  FOOD004: {
-    id: "FOOD004",
-    name: "Biryani",
-    price: 120.0,
-    image: "/placeholder.svg?height=100&width=100&text=Biryani",
-    description: "Aromatic basmati rice with spiced chicken/mutton",
-    category: "Main Course",
-  },
-  FOOD005: {
-    id: "FOOD005",
-    name: "Samosa",
-    price: 15.0,
-    image: "/placeholder.svg?height=100&width=100&text=Samosa",
-    description: "Crispy triangular pastry filled with spiced potatoes",
-    category: "Snacks",
-  },
 }
 
 // Debug function to test API connectivity

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { getAllProducts } from "../utils/productData.js"
-import { showSuccess, showError, showInfo } from "../utils/notificationManager.js"
 
 const NFCWriterComponent = () => {
   const [isNFCSupported, setIsNFCSupported] = useState(false)
@@ -61,17 +60,17 @@ const NFCWriterComponent = () => {
 
   const writeNFCTag = async () => {
     if (!selectedProduct) {
-      showError("Please select a product first")
+      showMessage("Please select a product first", "error")
       return
     }
 
     if (!isNFCSupported) {
-      showError("NFC is not supported on this device")
+      showMessage("NFC is not supported on this device", "error")
       return
     }
 
     setIsWriting(true)
-    showInfo("Preparing to write NFC tag...")
+    showMessage("Preparing to write NFC tag...", "info")
 
     try {
       // Use native Web NFC API
@@ -104,13 +103,13 @@ const NFCWriterComponent = () => {
         })
       }
 
-      showInfo("🏷️ Please tap your blank NFC tag to the device now...")
+      showMessage("🏷️ Please tap your blank NFC tag to the device now...", "info")
 
       // Write to NFC tag using native Web NFC API
       await ndef.write({ records })
 
       setPermissionGranted(true)
-      showSuccess(`✅ Successfully wrote ${selectedProduct} (${product?.name}) to NFC tag!`)
+      showMessage(`✅ Successfully wrote ${selectedProduct} (${product?.name}) to NFC tag!`, "success")
       console.log("✅ NFC tag written successfully:", selectedProduct)
 
       // Log what was written for debugging
@@ -119,18 +118,18 @@ const NFCWriterComponent = () => {
       console.error("❌ Error writing NFC tag:", error)
 
       if (error.name === "NotAllowedError") {
-        showError("❌ NFC access denied. Please allow NFC permissions in your browser.")
+        showMessage("❌ NFC access denied. Please allow NFC permissions in your browser.", "error")
       } else if (error.name === "NetworkError") {
-        showError("❌ No NFC tag found. Please place a blank NFC tag closer to your device.")
+        showMessage("❌ No NFC tag found. Please place a blank NFC tag closer to your device.", "error")
       } else if (error.name === "NotSupportedError") {
-        showError("❌ NFC writing is not supported on this device.")
+        showMessage("❌ NFC writing is not supported on this device.", "error")
         setIsNFCSupported(false)
       } else if (error.name === "InvalidStateError") {
-        showError("❌ NFC tag is not writable or already contains data. Use a blank tag.")
+        showMessage("❌ NFC tag is not writable or already contains data. Use a blank tag.", "error")
       } else if (error.name === "NotReadableError") {
-        showError("❌ NFC is disabled. Please enable NFC in your device settings.")
+        showMessage("❌ NFC is disabled. Please enable NFC in your device settings.", "error")
       } else {
-        showError(`❌ Failed to write NFC tag: ${error.message || "Unknown error"}`)
+        showMessage(`❌ Failed to write NFC tag: ${error.message || "Unknown error"}`, "error")
       }
     } finally {
       setIsWriting(false)
@@ -138,7 +137,7 @@ const NFCWriterComponent = () => {
   }
 
   const testWrittenTag = () => {
-    showInfo("💡 To test your NFC tag, go to the NFC Reader tab and tap the tag you just wrote.")
+    showMessage("💡 To test your NFC tag, go to the NFC Reader tab and tap the tag you just wrote.", "info")
   }
 
   const getMessageStyle = () => {

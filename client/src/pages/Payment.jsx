@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useCart } from "../utils/CartContext.jsx"
 import { createOrder } from "../utils/productData.js"
-import { showSuccess, showError } from "../utils/notificationManager.js"
 
 const Payment = () => {
   const { items, getTotal, clearCart } = useCart()
@@ -122,7 +121,6 @@ const Payment = () => {
       setTimeout(() => {
         navigate("/invoice")
       }, 3000)
-      showSuccess("Payment successful! Redirecting to invoice...")
     } catch (error) {
       console.error("Error creating order:", error)
       handlePaymentFailure("Error processing payment. Please contact support.")
@@ -133,7 +131,6 @@ const Payment = () => {
     setPaymentStatus("failed")
     setErrorMessage(message)
     setIsProcessing(false)
-    showError(message)
   }
 
   const retryPayment = () => {

@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import NFCWriterComponent from "../components/NFCWriter.jsx"
 import NFCReaderComponent from "../components/NFCReader.jsx"
-import { showSuccess } from "../utils/notificationManager.js"
 
 const NFCManager = () => {
   const [activeTab, setActiveTab] = useState("writer") // "writer" or "reader"
@@ -122,7 +121,7 @@ const NFCManager = () => {
             isActive={true}
             onProductAdded={(product) => {
               console.log("Product added via NFC test:", product)
-              showSuccess(
+              alert(
                 `✅ NFC Test Successful!\n\nProduct: ${product.name}\nPrice: ₹${product.price}\n\nThis would normally be added to your cart.`,
               )
             }}

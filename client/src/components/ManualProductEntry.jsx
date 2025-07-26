@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import toast from "react-hot-toast"
 import { useCart } from "../utils/CartContext.jsx"
 import { getAllProducts, getProductById } from "../utils/productData.js"
 import { playSuccessSound } from "../utils/soundUtils.js"
-import { showSuccess, showError, showLoading, removeNotification } from "../utils/notificationManager.js"
+import { SmartImage } from "../utils/imageUtils.jsx"
 
 const ManualProductEntry = ({ onProductAdded }) => {
   const [productId, setProductId] = useState("")
@@ -26,17 +27,20 @@ const ManualProductEntry = ({ onProductAdded }) => {
       const products = await getAllProducts()
       setAllProducts(products)
       console.log("✅ Loaded", Object.keys(products).length, "products")
-      showSuccess(`📦 Loaded ${Object.keys(products).length} products`)
+      toast.success(`Loaded ${Object.keys(products).length} products`, {
+        id: "products-loaded",
+        icon: "📦",
+      })
     } catch (error) {
       console.error("❌ Error loading products:", error)
-      showError("Failed to load products from database")
+      toast.error("Failed to load products from database")
     }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!productId.trim()) {
-      showError("Please enter a Product ID")
+      toast.error("Please enter a Product ID")
       return
     }
     await addProductToCart(productId.trim().toUpperCase())
@@ -44,20 +48,26 @@ const ManualProductEntry = ({ onProductAdded }) => {
 
   const addProductToCart = async (id) => {
     setIsLoading(true)
-    const loadingId = showLoading(`🔍 Looking up ${id}...`)
+    const loadingToast = toast.loading(`Looking up ${id}...`, {
+      id: `lookup-${id}`,
+    })
 
     try {
       const product = await getProductById(id)
 
       if (product) {
         if (isItemInCart(product.id)) {
-          removeNotification(loadingId)
-          showError(`${product.name} is already in your cart!`)
+          toast.error(`${product.name} is already in your cart!`, {
+            id: `manual-duplicate-${product.id}`,
+          })
         } else {
           addItemOnce(product)
           playSuccessSound()
-          removeNotification(loadingId)
-          showSuccess(`✅ Added ${product.name} to cart!`)
+          toast.success(`✅ Added ${product.name} to cart!`, {
+            id: `manual-success-${product.id}`,
+            icon: "🛒",
+            duration: 3000,
+          })
 
           if (onProductAdded) {
             onProductAdded(product)
@@ -65,13 +75,13 @@ const ManualProductEntry = ({ onProductAdded }) => {
           setProductId("")
         }
       } else {
-        removeNotification(loadingId)
-        showError(`Product ${id} not found`)
+        toast.error(`Product ${id} not found`, {
+          id: `manual-not-found-${id}`,
+        })
       }
     } catch (error) {
       console.error("Error fetching product:", error)
-      removeNotification(loadingId)
-      showError("Error connecting to server")
+      toast.error("Error connecting to server", { id: loadingToast })
     } finally {
       setIsLoading(false)
     }
@@ -120,7 +130,10 @@ const ManualProductEntry = ({ onProductAdded }) => {
         <button
           onClick={() => {
             setShowProductList(!showProductList)
-            showSuccess(showProductList ? "👁️ Product list hidden" : "👁️ Product list shown")
+            toast.success(showProductList ? "Product list hidden" : "Product list shown", {
+              id: "product-list-toggle",
+              icon: "👁️",
+            })
           }}
           className="nav-btn info"
           style={{ fontSize: "0.875rem", padding: "0.5rem 1rem" }}
@@ -188,7 +201,10 @@ const ManualProductEntry = ({ onProductAdded }) => {
               <button
                 onClick={() => {
                   loadAllProducts()
-                  showSuccess("🔄 Products refreshed!")
+                  toast.success("Products refreshed!", {
+                    id: "products-refreshed",
+                    icon: "🔄",
+                  })
                 }}
                 className="nav-btn secondary"
                 style={{ fontSize: "0.75rem", padding: "0.5rem 1rem" }}
@@ -268,8 +284,8 @@ const ManualProductEntry = ({ onProductAdded }) => {
                       )}
 
                       <div style={{ marginTop: "2rem" }}>
-                        <img
-                          src={product.image || "/placeholder.svg?height=120&width=300&text=Product+Image"}
+                        <SmartImage
+                          src={product.image}
                           alt={product.name}
                           style={{
                             width: "100%",
@@ -277,11 +293,8 @@ const ManualProductEntry = ({ onProductAdded }) => {
                             objectFit: "cover",
                             borderRadius: "var(--radius-lg)",
                             marginBottom: "1rem",
-                            background: "var(--bg-tertiary)",
                           }}
-                          onError={(e) => {
-                            e.target.src = "/placeholder.svg?height=120&width=300&text=Image+Error"
-                          }}
+                          fallbackSrc="/placeholder.svg?height=120&width=300&text=Product+Image"
                         />
 
                         <h5

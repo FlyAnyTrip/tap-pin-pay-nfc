@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import jsPDF from "jspdf"
 import html2canvas from "html2canvas"
-import { showSuccess, showError, showInfo } from "../utils/notificationManager.js"
 
 const Invoice = () => {
   const [orderDetails, setOrderDetails] = useState(null)
@@ -58,15 +57,13 @@ const Invoice = () => {
           text: `Order invoice for ₹${orderDetails.finalTotal}`,
           url: window.location.href,
         })
-        showSuccess("Invoice shared successfully!")
       } catch (error) {
         console.log("Error sharing:", error)
-        showError("Failed to share invoice.")
       }
     } else {
       // Fallback - copy to clipboard
       navigator.clipboard.writeText(window.location.href)
-      showInfo("Invoice link copied to clipboard!")
+      alert("Invoice link copied to clipboard!")
     }
   }
 

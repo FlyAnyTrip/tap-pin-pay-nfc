@@ -15,6 +15,8 @@ export default defineConfig({
           vendor: ["react", "react-dom", "react-router-dom"],
           qr: ["qr-scanner"],
           pdf: ["jspdf", "html2canvas"],
+          motion: ["framer-motion"],
+          toast: ["react-hot-toast"],
         },
       },
     },
@@ -22,5 +24,17 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 3000,
+  },
+  esbuild: {
+    loader: "jsx",
+    include: /src\/.*\.[jt]sx?$/,
+    exclude: [],
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      loader: {
+        ".js": "jsx",
+      },
+    },
   },
 })

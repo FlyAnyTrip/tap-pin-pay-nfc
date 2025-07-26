@@ -1,11 +1,14 @@
-// "use client"
+"use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
+import { motion, AnimatePresence } from "framer-motion"
+import toast from "react-hot-toast"
 import QRScannerComponent from "../components/QRScanner.jsx"
 import ManualProductEntry from "../components/ManualProductEntry.jsx"
 import { useCart } from "../utils/CartContext.jsx"
 import NFCReaderComponent from "../components/NFCReader.jsx"
+import { updatePageMeta, scrollToTop } from "../utils/pageUtils.js"
 
 const Home = () => {
   const { getItemCount, items, clearCart } = useCart()
@@ -14,258 +17,386 @@ const Home = () => {
   const [showManualEntry, setShowManualEntry] = useState(false)
   const [scanMode, setScanMode] = useState("qr") // "qr" or "nfc"
 
+  useEffect(() => {
+    updatePageMeta(
+      "Home - QR & NFC Scanner",
+      "Scan QR codes and NFC tags to add products to your cart. Modern shopping experience with instant product recognition.",
+    )
+    scrollToTop()
+  }, [])
+
   const handleProductAdded = (product) => {
     setLastAddedProduct(product)
-    // Disable scanner after adding a product
     setIsScannerActive(false)
+
+    toast.success(`✅ ${product.name} added to cart!`, {
+      id: `product-added-${product.id}`,
+      duration: 3000,
+      icon: "🛒",
+    })
   }
 
   const handleAddMoreProducts = () => {
     setIsScannerActive(true)
     setLastAddedProduct(null)
+    toast.success("Scanner activated! Ready to scan more products.", {
+      id: "scanner-reactivated",
+      icon: "📱",
+    })
   }
 
   const handleClearCart = () => {
-    if (window.confirm("Are you sure you want to clear your cart? This will also reset the scanner history.")) {
-      clearCart()
-      // Reset scanned products history
-      if (window.resetScannedProducts) {
-        window.resetScannedProducts()
-      }
-      setLastAddedProduct(null)
-      setIsScannerActive(true)
-    }
+    toast(
+      (t) => (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          <span style={{ fontWeight: "500" }}>Clear entire cart?</span>
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <button
+              style={{
+                padding: "0.25rem 0.75rem",
+                background: "var(--danger-color)",
+                color: "white",
+                borderRadius: "var(--radius-md)",
+                fontSize: "0.875rem",
+                fontWeight: "500",
+                border: "none",
+                cursor: "pointer",
+                transition: "var(--transition)",
+              }}
+              onClick={() => {
+                clearCart()
+                if (window.resetScannedProducts) {
+                  window.resetScannedProducts()
+                }
+                setLastAddedProduct(null)
+                setIsScannerActive(true)
+                toast.dismiss(t.id)
+                toast.success("Cart cleared successfully!", { icon: "🗑️" })
+              }}
+            >
+              Yes, Clear
+            </button>
+            <button
+              style={{
+                padding: "0.25rem 0.75rem",
+                background: "var(--text-secondary)",
+                color: "white",
+                borderRadius: "var(--radius-md)",
+                fontSize: "0.875rem",
+                fontWeight: "500",
+                border: "none",
+                cursor: "pointer",
+                transition: "var(--transition)",
+              }}
+              onClick={() => toast.dismiss(t.id)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        duration: 5000,
+        icon: "⚠️",
+      },
+    )
   }
 
   const toggleManualEntry = () => {
     setShowManualEntry(!showManualEntry)
+    toast.success(showManualEntry ? "Scanner mode activated" : "Manual entry mode activated", {
+      id: "manual-entry-toggle",
+      icon: showManualEntry ? "📷" : "📝",
+    })
+  }
+
+  const handleScanModeChange = (mode) => {
+    setScanMode(mode)
+    toast.success(mode === "qr" ? "QR Scanner activated" : "NFC Reader activated", {
+      id: `scan-mode-${mode}`,
+      icon: mode === "qr" ? "📷" : "📱",
+    })
   }
 
   return (
     <div className="container">
-      <div className="header">
-        <h1>QR Code Scanner</h1>
-        <p>Scan products to add them to your cart</p>
-      </div>
+      <motion.div
+        className="header"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <h1>🚀 Tip Tap Pay</h1>
+        <p>Scan QR codes & NFC tags to add products instantly</p>
+      </motion.div>
 
-      <div className="nav-buttons">
+      <motion.div
+        className="nav-buttons"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+      >
         <Link to="/cart" className="nav-btn secondary">
           🛒 Cart ({getItemCount()})
         </Link>
+
         {items.length > 0 && (
-          <Link to="/cart" className="nav-btn">
-            View Cart & Checkout
+          <Link to="/cart" className="nav-btn primary">
+            💳 Checkout
           </Link>
         )}
-        <Link to="/nfc-manager" className="nav-btn" style={{ background: "#9C27B0" }}>
+
+        <Link to="/nfc-manager" className="nav-btn accent">
           📱 NFC Manager
         </Link>
+
         <button
-          onClick={() => setScanMode("qr")}
-          className="nav-btn"
-          style={{ background: scanMode === "qr" ? "#4CAF50" : "#2196f3" }}
+          onClick={() => handleScanModeChange("qr")}
+          className={`nav-btn ${scanMode === "qr" ? "primary" : "info"}`}
         >
           {scanMode === "qr" ? "📷 QR Active" : "📷 QR Scanner"}
         </button>
+
         <button
-          onClick={() => setScanMode("nfc")}
-          className="nav-btn"
-          style={{ background: scanMode === "nfc" ? "#4CAF50" : "#FF9800" }}
+          onClick={() => handleScanModeChange("nfc")}
+          className={`nav-btn ${scanMode === "nfc" ? "primary" : "accent"}`}
         >
           {scanMode === "nfc" ? "📱 NFC Active" : "📱 NFC Reader"}
         </button>
-        <button
-          onClick={toggleManualEntry}
-          className="nav-btn"
-          style={{ background: showManualEntry ? "#ff9800" : "#2196f3" }}
-        >
+
+        <button onClick={toggleManualEntry} className={`nav-btn ${showManualEntry ? "accent" : "info"}`}>
           {showManualEntry ? "📷 Show Scanner" : "📝 Manual Entry"}
         </button>
+
         {items.length > 0 && (
           <button onClick={handleClearCart} className="nav-btn danger">
             🗑️ Clear Cart
           </button>
         )}
-      </div>
+      </motion.div>
 
-      {/* Scanner Status */}
-      {!isScannerActive && lastAddedProduct && !showManualEntry && (
-        <div
-          style={{
-            background: "#d4edda",
-            border: "1px solid #c3e6cb",
-            borderRadius: "10px",
-            padding: "1rem",
-            margin: "1rem 0",
-            textAlign: "center",
-            color: "#155724",
-          }}
-        >
-          <h3>✅ Product Added Successfully!</h3>
-          <p>
-            <strong>{lastAddedProduct.name}</strong> has been added to your cart.
-          </p>
-          <p>Use the cart to modify quantities or scan more products.</p>
-        </div>
-      )}
-
-      {/* Add More Products Button */}
-      {!isScannerActive && !showManualEntry && (
-        <div style={{ textAlign: "center", margin: "1rem 0" }}>
-          <button
-            onClick={handleAddMoreProducts}
-            className="nav-btn"
-            style={{
-              background: "#28a745",
-              fontSize: "1.1rem",
-              padding: "1rem 2rem",
-            }}
+      <AnimatePresence mode="wait">
+        {!isScannerActive && lastAddedProduct && !showManualEntry && (
+          <motion.div
+            key="success-message"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="status-message success"
+            style={{ margin: "1rem 0" }}
           >
-            📱 Add More Products
-          </button>
-        </div>
-      )}
+            <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1.125rem", fontWeight: "600" }}>
+              ✅ Product Added Successfully!
+            </h3>
+            <p style={{ margin: "0 0 0.5rem 0" }}>
+              <strong>{lastAddedProduct.name}</strong> has been added to your cart.
+            </p>
+            <p style={{ margin: "0", fontSize: "0.875rem", opacity: "0.8" }}>
+              Use the cart to modify quantities or scan more products.
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Manual Product Entry, QR Scanner, or NFC Reader */}
-      {showManualEntry ? (
-        <ManualProductEntry onProductAdded={handleProductAdded} />
-      ) : scanMode === "qr" ? (
-        <QRScannerComponent isActive={isScannerActive} onProductAdded={handleProductAdded} />
-      ) : (
-        <NFCReaderComponent isActive={isScannerActive} onProductAdded={handleProductAdded} />
-      )}
+      <AnimatePresence mode="wait">
+        {!isScannerActive && !showManualEntry && (
+          <motion.div
+            key="add-more-button"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            style={{ textAlign: "center", margin: "1.5rem 0" }}
+          >
+            <button
+              onClick={handleAddMoreProducts}
+              className="nav-btn primary"
+              style={{
+                fontSize: "1.125rem",
+                padding: "1rem 2rem",
+                boxShadow: "var(--shadow-lg)",
+              }}
+            >
+              📱 Add More Products
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <div
-        style={{
-          textAlign: "center",
-          marginTop: "2rem",
-          padding: "1rem",
-          background: "white",
-          borderRadius: "10px",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-        }}
+      <motion.div
+        key={showManualEntry ? "manual" : scanMode}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.3 }}
       >
-        <h3>How to use:</h3>
-
         {showManualEntry ? (
-          <ol style={{ textAlign: "left", maxWidth: "400px", margin: "1rem auto" }}>
-            <li>Browse all available products in the list below</li>
-            <li>Click on any product card to add it to cart</li>
-            <li>Or enter a Product ID manually and click "Add to Cart"</li>
-            <li>Use search and category filters to find products easily</li>
-            <li>Use +/- buttons in cart to change quantities</li>
-            <li>Switch to scanner mode for QR code or NFC scanning</li>
-          </ol>
+          <ManualProductEntry onProductAdded={handleProductAdded} />
         ) : scanMode === "qr" ? (
-          <ol style={{ textAlign: "left", maxWidth: "400px", margin: "1rem auto" }}>
-            <li>Point your camera at a QR code</li>
-            <li>Wait for the green animation and beep sound</li>
-            <li>Product will be added to cart (only once per unique product)</li>
-            <li>Duplicate scans of same product are ignored</li>
-            <li>Use +/- buttons in cart to change quantities</li>
-            <li>Click "Add More Products" to scan additional items</li>
-          </ol>
+          <QRScannerComponent isActive={isScannerActive} onProductAdded={handleProductAdded} />
         ) : (
-          <ol style={{ textAlign: "left", maxWidth: "400px", margin: "1rem auto" }}>
-            <li>Hold your device near an NFC tag</li>
-            <li>Wait for the blue animation and beep sound</li>
-            <li>Product will be added to cart automatically</li>
-            <li>Duplicate taps of same product are ignored</li>
-            <li>Use +/- buttons in cart to change quantities</li>
-            <li>Click "Add More Products" to read additional tags</li>
-          </ol>
+          <NFCReaderComponent isActive={isScannerActive} onProductAdded={handleProductAdded} />
         )}
+      </motion.div>
 
-        <div style={{ marginTop: "1rem", fontSize: "14px", color: "#666" }}>
-          <p>
-            <strong>Sample Product IDs to test:</strong>
-          </p>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-              gap: "0.5rem",
-              fontSize: "12px",
-            }}
-          >
-            <div>
-              <strong>🍽️ Food:</strong> FOOD001-FOOD015
-            </div>
-            <div>
-              <strong>📱 Electronics:</strong> ELEC001-ELEC020
-            </div>
-            <div>
-              <strong>👕 Clothes:</strong> CLTH001-CLTH020
-            </div>
-            <div>
-              <strong>📚 Books:</strong> BOOK001-BOOK015
-            </div>
-            <div>
-              <strong>🏠 Home:</strong> HOME001-HOME015
-            </div>
-            <div>
-              <strong>⚽ Sports:</strong> SPRT001-SPRT015
+      <motion.div
+        className="card"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+        style={{ marginTop: "2rem" }}
+      >
+        <h3 style={{ marginBottom: "1.5rem", textAlign: "center", color: "var(--text-primary)" }}>📖 How to Use</h3>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem" }}>
+          <div>
+            <h4
+              style={{
+                color: "var(--primary-color)",
+                marginBottom: "1rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+              }}
+            >
+              {showManualEntry ? "📝" : scanMode === "qr" ? "📷" : "📱"}
+              {showManualEntry ? "Manual Entry" : scanMode === "qr" ? "QR Scanner" : "NFC Reader"}
+            </h4>
+            <ol style={{ paddingLeft: "1.5rem", lineHeight: "1.8", color: "var(--text-secondary)" }}>
+              {showManualEntry ? (
+                <>
+                  <li>Browse all available products in the list</li>
+                  <li>Click on any product card to add it to cart</li>
+                  <li>Or enter a Product ID manually</li>
+                  <li>Use search and category filters</li>
+                  <li>Switch to scanner mode for QR/NFC</li>
+                </>
+              ) : scanMode === "qr" ? (
+                <>
+                  <li>Point your camera at a QR code</li>
+                  <li>Wait for the green animation and sound</li>
+                  <li>Product will be added automatically</li>
+                  <li>Duplicates are prevented</li>
+                  <li>Use cart to modify quantities</li>
+                </>
+              ) : (
+                <>
+                  <li>Hold your device near an NFC tag</li>
+                  <li>Wait for the blue animation and sound</li>
+                  <li>Product will be added automatically</li>
+                  <li>Duplicates are prevented</li>
+                  <li>Use cart to modify quantities</li>
+                </>
+              )}
+            </ol>
+          </div>
+
+          <div>
+            <h4 style={{ color: "var(--secondary-color)", marginBottom: "1rem" }}>🏷️ Sample Product IDs</h4>
+            <div
+              style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "0.75rem", fontSize: "0.875rem" }}
+            >
+              <div className="badge primary">🍽️ Food: FOOD001-015</div>
+              <div className="badge info">📱 Electronics: ELEC001-020</div>
+              <div className="badge secondary">👕 Clothes: CLTH001-020</div>
+              <div className="badge warning">📚 Books: BOOK001-015</div>
+              <div className="badge danger">🏠 Home: HOME001-015</div>
+              <div className="badge primary">⚽ Sports: SPRT001-015</div>
             </div>
           </div>
         </div>
 
-        {/* Current Cart Summary */}
-        {items.length > 0 && (
-          <div
-            style={{
-              marginTop: "1rem",
-              padding: "1rem",
-              background: "#f8f9fa",
-              borderRadius: "8px",
-              border: "1px solid #dee2e6",
-            }}
-          >
-            <h4>🛒 Current Cart Summary:</h4>
-            <div style={{ fontSize: "14px", color: "#666" }}>
-              {items.map((item) => (
-                <div key={item.id} style={{ margin: "0.5rem 0" }}>
-                  {item.name} - Qty: {item.quantity} - ₹{(item.price * item.quantity).toFixed(2)}
+        <AnimatePresence>
+          {items.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              style={{
+                marginTop: "2rem",
+                padding: "1.5rem",
+                background: "linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)",
+                borderRadius: "var(--radius-xl)",
+                border: "1px solid var(--border-light)",
+              }}
+            >
+              <h4
+                style={{
+                  margin: "0 0 1rem 0",
+                  color: "var(--text-primary)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                }}
+              >
+                🛒 Current Cart Summary
+              </h4>
+              <div style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>
+                {items.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    style={{
+                      margin: "0.5rem 0",
+                      padding: "0.5rem",
+                      background: "var(--bg-primary)",
+                      borderRadius: "var(--radius-md)",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span>
+                      {item.name} × {item.quantity}
+                    </span>
+                    <span style={{ fontWeight: "600", color: "var(--secondary-color)" }}>
+                      ₹{(item.price * item.quantity).toFixed(2)}
+                    </span>
+                  </motion.div>
+                ))}
+                <div
+                  style={{
+                    fontWeight: "700",
+                    marginTop: "1rem",
+                    fontSize: "1.125rem",
+                    color: "var(--primary-color)",
+                    textAlign: "right",
+                    padding: "0.75rem",
+                    background: "var(--bg-primary)",
+                    borderRadius: "var(--radius-md)",
+                    border: "2px solid var(--primary-color)",
+                  }}
+                >
+                  Total: ₹{items.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2)}
                 </div>
-              ))}
-              <div style={{ fontWeight: "bold", marginTop: "0.5rem", fontSize: "16px", color: "#333" }}>
-                Total: ₹{items.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2)}
               </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* Feature Info */}
         <div
           style={{
-            marginTop: "1rem",
-            padding: "1rem",
-            background: "#e7f3ff",
-            border: "1px solid #b3d9ff",
-            borderRadius: "8px",
-            fontSize: "13px",
-            color: "#0066cc",
+            marginTop: "2rem",
+            padding: "1.5rem",
+            background: "linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%)",
+            border: "1px solid rgba(99, 102, 241, 0.2)",
+            borderRadius: "var(--radius-xl)",
+            fontSize: "0.875rem",
+            color: "var(--primary-dark)",
           }}
         >
-          <h4 style={{ margin: "0 0 0.5rem 0" }}>🆕 New Features:</h4>
-          <ul style={{ textAlign: "left", margin: "0", paddingLeft: "1.5rem" }}>
-            <li>
-              <strong>Smart Product Browser:</strong> View all products with search and filters
-            </li>
-            <li>
-              <strong>One-Click Add:</strong> Click any product card to add to cart instantly
-            </li>
-            <li>
-              <strong>Category Filters:</strong> Filter by Street Food, South Indian, etc.
-            </li>
-            <li>
-              <strong>Real-time Search:</strong> Search by name, ID, or description
-            </li>
-            <li>
-              <strong>Indian Currency:</strong> All prices now shown in ₹ (Rupees)
-            </li>
-          </ul>
+          <h4 style={{ margin: "0 0 1rem 0", display: "flex", alignItems: "center", gap: "0.5rem" }}>✨ Features</h4>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "1rem" }}>
+            <div>• Smart product browser with filters</div>
+            <div>• One-click add to cart</div>
+            <div>• Real-time search functionality</div>
+            <div>• Duplicate prevention system</div>
+            <div>• Modern toast notifications</div>
+            <div>• Responsive design for all devices</div>
+          </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

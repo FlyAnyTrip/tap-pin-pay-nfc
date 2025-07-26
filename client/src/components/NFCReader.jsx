@@ -204,8 +204,8 @@ const NFCReaderComponent = ({ isActive = true, onProductAdded }) => {
             // Clean up the text and check for product ID format
             const cleanText = text.trim().toUpperCase()
 
-            // Check if it matches product ID format (FOOD001, PROD001, etc.)
-            const productMatch = cleanText.match(/^(FOOD|PROD)\d{3}$/i)
+            // Check if it matches ANY product ID format (FOOD, ELEC, CLTH, BOOK, HOME, SPRT)
+            const productMatch = cleanText.match(/^(FOOD|ELEC|CLTH|BOOK|HOME|SPRT)\d{3}$/i)
             if (productMatch) {
               productId = cleanText
               console.log("✅ Found product ID in text:", productId)
@@ -213,7 +213,7 @@ const NFCReaderComponent = ({ isActive = true, onProductAdded }) => {
             }
 
             // Also try to extract from longer text (in case there's extra info)
-            const extractMatch = cleanText.match(/(FOOD|PROD)\d{3}/i)
+            const extractMatch = cleanText.match(/(FOOD|ELEC|CLTH|BOOK|HOME|SPRT)\d{3}/i)
             if (extractMatch) {
               productId = extractMatch[0].toUpperCase()
               console.log("✅ Extracted product ID from text:", productId)
@@ -226,7 +226,7 @@ const NFCReaderComponent = ({ isActive = true, onProductAdded }) => {
             try {
               const rawText = String.fromCharCode(...new Uint8Array(record.data))
               console.log("📄 Raw text fallback:", rawText)
-              const fallbackMatch = rawText.match(/(FOOD|PROD)\d{3}/i)
+              const fallbackMatch = rawText.match(/(FOOD|ELEC|CLTH|BOOK|HOME|SPRT)\d{3}/i)
               if (fallbackMatch) {
                 productId = fallbackMatch[0].toUpperCase()
                 console.log("✅ Found product ID in raw text:", productId)
@@ -242,12 +242,16 @@ const NFCReaderComponent = ({ isActive = true, onProductAdded }) => {
             const url = new TextDecoder().decode(record.data)
             console.log("🔗 NFC URL content:", url)
 
-            // Extract product ID from URL (e.g., https://example.com/product/FOOD001)
+            // Extract product ID from URL (e.g., https://example.com/product/ELEC001)
             const urlMatch = url.match(/\/product\/([A-Z0-9]+)$/i)
             if (urlMatch) {
-              productId = urlMatch[1].toUpperCase()
-              console.log("✅ Found product ID in URL:", productId)
-              break
+              const extractedId = urlMatch[1].toUpperCase()
+              // Verify it matches our product ID pattern
+              if (extractedId.match(/^(FOOD|ELEC|CLTH|BOOK|HOME|SPRT)\d{3}$/)) {
+                productId = extractedId
+                console.log("✅ Found product ID in URL:", productId)
+                break
+              }
             }
           } catch (decodeError) {
             console.error("Error decoding URL record:", decodeError)

@@ -19,8 +19,14 @@
       "dest": "/server/server.js"
     },
     {
+      "src": "/(.*\\.(js|css|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot))",
+      "headers": {
+        "cache-control": "max-age=31536000"
+      }
+    },
+    {
       "src": "/(.*)",
-      "dest": "/client/dist/$1"
+      "dest": "/client/dist/index.html"
     }
   ],
   "functions": {
@@ -30,5 +36,11 @@
   },
   "env": {
     "MONGODB_URI": "@mongodb_uri"
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/client/dist/index.html"
+    }
+  ]
 }

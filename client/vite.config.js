@@ -16,7 +16,7 @@ export default defineConfig({
           qr: ["qr-scanner"],
           pdf: ["jspdf", "html2canvas"],
           motion: ["framer-motion"],
-          toast: ["react-hot-toast"],
+          three: ["three", "@react-three/fiber", "@react-three/drei"],
         },
       },
     },
@@ -35,6 +35,13 @@ export default defineConfig({
       loader: {
         ".js": "jsx",
       },
+    },
+    include: ["three", "@react-three/fiber", "@react-three/drei"],
+  },
+  resolve: {
+    alias: {
+      // Fix Three.js module resolution
+      three: "three",
     },
   },
 })

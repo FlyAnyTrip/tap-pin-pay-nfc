@@ -8,7 +8,7 @@ import { OrbitControls, Environment, Float, Sphere, MeshDistortMaterial, Box, Te
 import { updatePageMeta, scrollToTop } from "../utils/pageUtils.js"
 import "./LandingPage.css"
 
-// 3D Phone Component (Simplified)
+// Simplified 3D Phone Component
 const Phone3D = () => {
   return (
     <Float speed={2} rotationIntensity={1} floatIntensity={2}>
@@ -41,7 +41,7 @@ const Phone3D = () => {
   )
 }
 
-// 3D Card Component
+// Simplified 3D Card Component
 const Card3D = ({ position, color, text }) => {
   return (
     <Float speed={1.5} rotationIntensity={0.5} floatIntensity={1}>
@@ -57,7 +57,7 @@ const Card3D = ({ position, color, text }) => {
   )
 }
 
-// Floating Spheres
+// Simplified Floating Spheres
 const FloatingSpheres = () => {
   return (
     <>
@@ -82,7 +82,7 @@ const FloatingSpheres = () => {
   )
 }
 
-// 3D Scene Component
+// Simplified 3D Scene Component
 const Scene3D = () => {
   return (
     <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
@@ -115,7 +115,7 @@ const Simple3DFallback = () => (
         fontSize: "1rem",
       }}
     >
-      {/* 🌟 3D Experience Loading... */}
+      {/* Loading 3D Experience... */}
     </div>
   </div>
 )

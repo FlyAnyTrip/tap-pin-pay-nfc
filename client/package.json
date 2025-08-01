@@ -14,9 +14,10 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.1",
     "qr-scanner": "^1.4.2",
-    "framer-motion": "^10.16.16",
     "jspdf": "^2.5.1",
-    "html2canvas": "^1.4.1"
+    "html2canvas": "^1.4.1",
+    "react-hot-toast": "^2.4.1",
+    "framer-motion": "^10.16.4"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",

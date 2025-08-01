@@ -16,6 +16,7 @@ export default defineConfig({
           qr: ["qr-scanner"],
           pdf: ["jspdf", "html2canvas"],
           motion: ["framer-motion"],
+          toast: ["react-hot-toast"],
         },
       },
     },

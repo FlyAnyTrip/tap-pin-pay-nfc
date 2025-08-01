@@ -16,10 +16,7 @@
     "qr-scanner": "^1.4.2",
     "framer-motion": "^10.16.16",
     "jspdf": "^2.5.1",
-    "html2canvas": "^1.4.1",
-    "@react-three/fiber": "^8.15.12",
-    "@react-three/drei": "^9.88.13",
-    "three": "^0.159.0"
+    "html2canvas": "^1.4.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",

@@ -1,8 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import toast from "react-hot-toast"
 import { useCart } from "../utils/CartContext.jsx"
 import { getAllProducts, getProductById } from "../utils/productData.js"
 import { playSuccessSound } from "../utils/soundUtils.js"
@@ -15,6 +14,7 @@ const ManualProductEntry = ({ onProductAdded }) => {
   const [showProductList, setShowProductList] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const [processingItems, setProcessingItems] = useState(new Set())
   const { addItemOnce, isItemInCart } = useCart()
 
   useEffect(() => {
@@ -27,65 +27,96 @@ const ManualProductEntry = ({ onProductAdded }) => {
       const products = await getAllProducts()
       setAllProducts(products)
       console.log("✅ Loaded", Object.keys(products).length, "products")
-      toast.success(`Loaded ${Object.keys(products).length} products`, {
-        id: "products-loaded",
-        icon: "📦",
-      })
     } catch (error) {
       console.error("❌ Error loading products:", error)
-      toast.error("Failed to load products from database")
     }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!productId.trim()) {
-      toast.error("Please enter a Product ID")
+      console.error("Please enter a Product ID")
       return
     }
     await addProductToCart(productId.trim().toUpperCase())
   }
 
-  const addProductToCart = async (id) => {
-    setIsLoading(true)
-    const loadingToast = toast.loading(`Looking up ${id}...`, {
-      id: `lookup-${id}`,
-    })
-
-    try {
-      const product = await getProductById(id)
-
-      if (product) {
-        if (isItemInCart(product.id)) {
-          toast.error(`${product.name} is already in your cart!`, {
-            id: `manual-duplicate-${product.id}`,
-          })
-        } else {
-          addItemOnce(product)
-          playSuccessSound()
-          toast.success(`✅ Added ${product.name} to cart!`, {
-            id: `manual-success-${product.id}`,
-            icon: "🛒",
-            duration: 3000,
-          })
-
-          if (onProductAdded) {
-            onProductAdded(product)
-          }
-          setProductId("")
-        }
-      } else {
-        toast.error(`Product ${id} not found`, {
-          id: `manual-not-found-${id}`,
-        })
+  const addProductToCart = useCallback(
+    async (id) => {
+      // Duplicate prevention
+      const duplicateKey = `adding-${id}`
+      if (window.currentlyAdding && window.currentlyAdding.has(duplicateKey)) {
+        console.log("🚫 BLOCKED: Already adding this product")
+        return
       }
-    } catch (error) {
-      console.error("Error fetching product:", error)
-      toast.error("Error connecting to server", { id: loadingToast })
-    } finally {
-      setIsLoading(false)
-    }
-  }
+
+      if (!window.currentlyAdding) {
+        window.currentlyAdding = new Set()
+      }
+
+      window.currentlyAdding.add(duplicateKey)
+
+      setTimeout(() => {
+        if (window.currentlyAdding) {
+          window.currentlyAdding.delete(duplicateKey)
+        }
+      }, 3000)
+
+      if (processingItems.has(id)) {
+        console.log("⚠️ Already processing item:", id)
+        window.currentlyAdding.delete(duplicateKey)
+        return
+      }
+
+      if (isItemInCart(id)) {
+        console.log(`Product ${id} is already in your cart!`)
+        window.currentlyAdding.delete(duplicateKey)
+        return
+      }
+
+      setProcessingItems((prev) => new Set(prev).add(id))
+      setIsLoading(true)
+
+      console.log(`Looking up ${id}...`)
+
+      try {
+        const product = await getProductById(id)
+
+        if (product) {
+          if (isItemInCart(product.id)) {
+            console.log(`${product.name} is already in your cart!`)
+          } else {
+            addItemOnce(product)
+            playSuccessSound()
+            console.log(`✅ Added ${product.name} to cart!`)
+
+            if (onProductAdded && typeof onProductAdded === "function") {
+              try {
+                onProductAdded(product)
+              } catch (callbackError) {
+                console.error("Error in onProductAdded callback:", callbackError)
+              }
+            }
+
+            setProductId("")
+          }
+        } else {
+          console.error(`Product ${id} not found`)
+        }
+      } catch (error) {
+        console.error("Error fetching product:", error)
+      } finally {
+        setIsLoading(false)
+        setProcessingItems((prev) => {
+          const newSet = new Set(prev)
+          newSet.delete(id)
+          return newSet
+        })
+        window.currentlyAdding.delete(duplicateKey)
+      }
+    },
+    [addItemOnce, isItemInCart, onProductAdded, processingItems],
+  )
 
   const getFilteredProducts = () => {
     const products = Object.values(allProducts)
@@ -113,6 +144,24 @@ const ManualProductEntry = ({ onProductAdded }) => {
     return categories.sort()
   }
 
+  const handleProductListToggle = useCallback(() => {
+    setShowProductList(!showProductList)
+  }, [showProductList])
+
+  const handleRefreshProducts = useCallback(() => {
+    loadAllProducts()
+  }, [])
+
+  const handleQuickAdd = useCallback(
+    (id) => {
+      if (processingItems.has(id)) {
+        return
+      }
+      addProductToCart(id)
+    },
+    [addProductToCart, processingItems],
+  )
+
   const filteredProducts = getFilteredProducts()
   const categories = getCategories()
 
@@ -128,13 +177,7 @@ const ManualProductEntry = ({ onProductAdded }) => {
           📝 Manual Product Entry
         </h3>
         <button
-          onClick={() => {
-            setShowProductList(!showProductList)
-            toast.success(showProductList ? "Product list hidden" : "Product list shown", {
-              id: "product-list-toggle",
-              icon: "👁️",
-            })
-          }}
+          onClick={handleProductListToggle}
           className="nav-btn info"
           style={{ fontSize: "0.875rem", padding: "0.5rem 1rem" }}
         >
@@ -199,13 +242,7 @@ const ManualProductEntry = ({ onProductAdded }) => {
                 🛒 Available Products ({filteredProducts.length})
               </h4>
               <button
-                onClick={() => {
-                  loadAllProducts()
-                  toast.success("Products refreshed!", {
-                    id: "products-refreshed",
-                    icon: "🔄",
-                  })
-                }}
+                onClick={handleRefreshProducts}
                 className="nav-btn secondary"
                 style={{ fontSize: "0.75rem", padding: "0.5rem 1rem" }}
               >
@@ -262,14 +299,13 @@ const ManualProductEntry = ({ onProductAdded }) => {
                       className="card"
                       style={{
                         padding: "1.5rem",
-                        cursor: "pointer",
+                        cursor: "default",
                         position: "relative",
                         background: isItemInCart(product.id) ? "rgba(16, 185, 129, 0.05)" : "var(--bg-primary)",
                         border: isItemInCart(product.id)
                           ? "2px solid var(--secondary-color)"
                           : "1px solid var(--border-light)",
                       }}
-                      onClick={() => addProductToCart(product.id)}
                       whileHover={{ y: -4, boxShadow: "var(--shadow-xl)" }}
                       whileTap={{ scale: 0.98 }}
                     >
@@ -339,13 +375,31 @@ const ManualProductEntry = ({ onProductAdded }) => {
 
                         <button
                           className={`nav-btn ${isItemInCart(product.id) ? "accent" : "primary"}`}
-                          style={{ width: "100%", justifyContent: "center" }}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            addProductToCart(product.id)
+                          style={{
+                            width: "100%",
+                            justifyContent: "center",
+                            opacity: processingItems.has(product.id) ? 0.7 : 1,
+                            cursor: processingItems.has(product.id) ? "not-allowed" : "pointer",
                           }}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            if (!processingItems.has(product.id)) {
+                              addProductToCart(product.id)
+                            }
+                          }}
+                          disabled={processingItems.has(product.id)}
                         >
-                          {isItemInCart(product.id) ? "✅ In Cart" : "➕ Add to Cart"}
+                          {processingItems.has(product.id) ? (
+                            <>
+                              <div className="loading-spinner" style={{ marginRight: "0.5rem" }}></div>
+                              Adding...
+                            </>
+                          ) : isItemInCart(product.id) ? (
+                            "✅ In Cart"
+                          ) : (
+                            "➕ Add to Cart"
+                          )}
                         </button>
                       </div>
                     </motion.div>
@@ -404,20 +458,29 @@ const ManualProductEntry = ({ onProductAdded }) => {
               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
                 {category.ids.map((id) => {
                   const product = allProducts[id]
+                  const isProcessing = processingItems.has(id)
                   return (
                     <motion.button
                       key={id}
                       className={`badge ${isItemInCart(id) ? "warning" : "primary"}`}
                       style={{
-                        cursor: "pointer",
+                        cursor: isProcessing ? "not-allowed" : "pointer",
                         border: "none",
                         transition: "var(--transition)",
+                        opacity: isProcessing ? 0.7 : 1,
                       }}
-                      onClick={() => addProductToCart(id)}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        if (!isProcessing) {
+                          handleQuickAdd(id)
+                        }
+                      }}
+                      whileHover={{ scale: isProcessing ? 1 : 1.05 }}
+                      whileTap={{ scale: isProcessing ? 1 : 0.95 }}
+                      disabled={isProcessing}
                     >
-                      {isItemInCart(id) ? "✅" : "+"} {id}
+                      {isProcessing ? "⏳" : isItemInCart(id) ? "✅" : "+"} {id}
                       {product && ` - ₹${product.price}`}
                     </motion.button>
                   )

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
-import toast from "react-hot-toast"
 import { useCart } from "../utils/CartContext.jsx"
 import { getProductById } from "../utils/productData.js"
 import { playBeepSound, playSuccessSound, preloadAudio } from "../utils/soundUtils.js"
@@ -41,11 +40,11 @@ const NFCReaderComponent = ({ isActive = true, onProductAdded }) => {
     if ("NDEFReader" in window) {
       setIsNFCSupported(true)
       console.log("✅ Web NFC API is supported")
-      toast.success("NFC is supported on this device", { icon: "📱" })
+      console.log("NFC is supported on this device", { icon: "📱" })
     } else {
       setIsNFCSupported(false)
       console.log("❌ Web NFC API is not supported")
-      toast.error("NFC is not supported on this device or browser")
+      console.log("NFC is not supported on this device or browser")
     }
   }
 
@@ -61,7 +60,7 @@ const NFCReaderComponent = ({ isActive = true, onProductAdded }) => {
         return true
       } else {
         setPermissionGranted(false)
-        toast.error("NFC permission denied. Please enable NFC permissions.")
+        console.log("NFC permission denied. Please enable NFC permissions.")
         return false
       }
     } catch (error) {
@@ -77,7 +76,7 @@ const NFCReaderComponent = ({ isActive = true, onProductAdded }) => {
       setIsReading(true)
       setNfcStatus("reading")
 
-      const loadingToast = toast.loading("Requesting NFC permissions...", {
+      console.log("Requesting NFC permissions...", {
         id: "nfc-permission-request",
       })
 
@@ -85,7 +84,7 @@ const NFCReaderComponent = ({ isActive = true, onProductAdded }) => {
       if (!hasPermission) {
         setIsReading(false)
         setNfcStatus("error")
-        toast.error("NFC permission denied", { id: loadingToast })
+        console.log("NFC permission denied", { id: "nfc-permission-request" })
         return
       }
 
@@ -99,7 +98,7 @@ const NFCReaderComponent = ({ isActive = true, onProductAdded }) => {
       ndefReaderRef.current.addEventListener("readingerror", handleNFCError)
 
       setPermissionGranted(true)
-      toast.success("🎯 NFC Reader Active - Tap an NFC tag", {
+      console.log("🎯 NFC Reader Active - Tap an NFC tag", {
         id: "nfc-reader-activated",
       })
     } catch (error) {
@@ -108,20 +107,20 @@ const NFCReaderComponent = ({ isActive = true, onProductAdded }) => {
       setNfcStatus("error")
 
       if (error.name === "NotAllowedError") {
-        toast.error("❌ NFC access denied. Please allow NFC permissions.", {
+        console.log("❌ NFC access denied. Please allow NFC permissions.", {
           id: "nfc-permission-denied",
         })
       } else if (error.name === "NotSupportedError") {
-        toast.error("❌ NFC is not supported on this device.", {
+        console.log("❌ NFC is not supported on this device.", {
           id: "nfc-not-supported",
         })
         setIsNFCSupported(false)
       } else if (error.name === "NotReadableError") {
-        toast.error("❌ NFC is disabled. Please enable NFC in device settings.", {
+        console.log("❌ NFC is disabled. Please enable NFC in device settings.", {
           id: "nfc-disabled",
         })
       } else {
-        toast.error(`❌ NFC Error: ${error.message || "Unknown error occurred"}`, {
+        console.log(`❌ NFC Error: ${error.message || "Unknown error occurred"}`, {
           id: "nfc-general-error",
         })
       }
@@ -157,7 +156,7 @@ const NFCReaderComponent = ({ isActive = true, onProductAdded }) => {
   const handleNFCError = (error) => {
     console.error("❌ NFC reading error:", error)
     setNfcStatus("error")
-    toast.error("❌ Error reading NFC tag. Please try again.")
+    console.log("❌ Error reading NFC tag. Please try again.")
 
     setTimeout(() => {
       if (isReading) {
@@ -249,7 +248,7 @@ const NFCReaderComponent = ({ isActive = true, onProductAdded }) => {
       if (!productId) {
         console.log("❌ No valid product ID found in NFC tag")
         setNfcStatus("error")
-        toast.error("❌ Invalid NFC tag - No product information found")
+        console.log("❌ Invalid NFC tag - No product information found")
 
         setTimeout(() => {
           if (isReading) {
@@ -268,7 +267,7 @@ const NFCReaderComponent = ({ isActive = true, onProductAdded }) => {
       setNfcStatus("reading")
       playBeepSound()
 
-      const scanningToast = toast.loading(`🔍 Processing ${productId}...`, {
+      console.log(`🔍 Processing ${productId}...`, {
         id: `nfc-processing-${productId}`,
       })
 
@@ -281,7 +280,7 @@ const NFCReaderComponent = ({ isActive = true, onProductAdded }) => {
         if (isItemInCart(product.id)) {
           setTimeout(() => {
             setNfcStatus("error")
-            toast.error(`⚠️ ${product.name} is already in your cart!`, {
+            console.log(`⚠️ ${product.name} is already in your cart!`, {
               id: `nfc-duplicate-${product.id}`,
             })
 
@@ -297,7 +296,7 @@ const NFCReaderComponent = ({ isActive = true, onProductAdded }) => {
             setNfcStatus("success")
             playSuccessSound()
             addItemOnce(product)
-            toast.success(`✅ Added ${product.name} to cart via NFC!`, {
+            console.log(`✅ Added ${product.name} to cart via NFC!`, {
               id: `nfc-success-${product.id}`,
               icon: "📱",
               duration: 3000,
@@ -319,7 +318,7 @@ const NFCReaderComponent = ({ isActive = true, onProductAdded }) => {
         console.log("❌ Product not found:", productId)
         setTimeout(() => {
           setNfcStatus("error")
-          toast.error(`❌ Product ${productId} not found in database`, { id: scanningToast })
+          console.log(`❌ Product ${productId} not found in database`, { id: `nfc-processing-${productId}` })
 
           setTimeout(() => {
             if (isReading) {
@@ -336,7 +335,7 @@ const NFCReaderComponent = ({ isActive = true, onProductAdded }) => {
     } catch (error) {
       console.error("❌ Error processing NFC tag:", error)
       setNfcStatus("error")
-      toast.error("❌ Error processing NFC tag. Please try again.")
+      console.log("❌ Error processing NFC tag. Please try again.")
 
       setTimeout(() => {
         if (isReading) {

@@ -73,12 +73,20 @@ const Invoice = () => {
         <div className="header">
           <h1>Invoice</h1>
         </div>
+        <div className="nav-buttons">
+          <Link to="/" className="nav-btn secondary">
+            ← Back to Home
+          </Link>
+          <Link to="/scanner" className="nav-btn">
+            🛒 Start Shopping
+          </Link>
+        </div>
         <div className="invoice-container">
           <div style={{ textAlign: "center", padding: "3rem" }}>
             <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>📄</div>
             <h3>No invoice found</h3>
             <p>Please complete a purchase first to generate an invoice.</p>
-            <Link to="/" className="nav-btn" style={{ marginTop: "1rem" }}>
+            <Link to="/scanner" className="nav-btn" style={{ marginTop: "1rem" }}>
               Start Shopping
             </Link>
           </div>
@@ -99,6 +107,9 @@ const Invoice = () => {
       </div>
 
       <div className="nav-buttons">
+        <Link to="/" className="nav-btn secondary">
+          ← Back to Home
+        </Link>
         <button onClick={downloadPDF} className="nav-btn" style={{ background: "#28a745" }}>
           📄 Download PDF
         </button>
@@ -108,7 +119,7 @@ const Invoice = () => {
         <button onClick={shareInvoice} className="nav-btn" style={{ background: "#ffc107", color: "#000" }}>
           📤 Share Invoice
         </button>
-        <Link to="/" className="nav-btn">
+        <Link to="/scanner" className="nav-btn">
           🛒 New Order
         </Link>
       </div>

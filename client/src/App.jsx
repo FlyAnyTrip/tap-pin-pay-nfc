@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { Toaster } from "react-hot-toast"
 import { CartProvider } from "./utils/CartContext.jsx"
+import LandingPage from "./pages/LandingPage.jsx"
 import Home from "./pages/Home.jsx"
 import Cart from "./pages/Cart.jsx"
 import Payment from "./pages/Payment.jsx"
@@ -66,7 +67,8 @@ function App() {
             reverseOrder={false}
           />
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/scanner" element={<Home />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/invoice" element={<Invoice />} />

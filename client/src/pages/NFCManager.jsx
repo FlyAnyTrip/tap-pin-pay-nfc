@@ -16,8 +16,11 @@ const NFCManager = () => {
       </div>
 
       <div className="nav-buttons">
-        <Link to="/" className="nav-btn">
+        <Link to="/" className="nav-btn secondary">
           ← Back to Home
+        </Link>
+        <Link to="/scanner" className="nav-btn">
+          🛒 Go to Scanner
         </Link>
         <button
           onClick={() => setActiveTab("writer")}

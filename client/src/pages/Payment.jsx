@@ -223,7 +223,7 @@ const Payment = () => {
               </button>
 
               <Link
-                to="/"
+                to="/scanner"
                 style={{
                   padding: "1rem 2rem",
                   background: "#007bff",
@@ -362,11 +362,19 @@ const Payment = () => {
         <div className="header">
           <h1>Payment</h1>
         </div>
+        <div className="nav-buttons">
+          <Link to="/" className="nav-btn secondary">
+            ← Back to Home
+          </Link>
+          <Link to="/scanner" className="nav-btn">
+            🛒 Start Shopping
+          </Link>
+        </div>
         <div className="payment-container">
           <div style={{ textAlign: "center", padding: "2rem" }}>
             <h3>🛒 No items in cart</h3>
             <p>Please add items before checkout.</p>
-            <Link to="/" className="nav-btn" style={{ marginTop: "1rem" }}>
+            <Link to="/scanner" className="nav-btn" style={{ marginTop: "1rem" }}>
               Start Shopping
             </Link>
           </div>
@@ -384,6 +392,9 @@ const Payment = () => {
       </div>
 
       <div className="nav-buttons">
+        <Link to="/" className="nav-btn secondary">
+          ← Back to Home
+        </Link>
         <Link to="/cart" className="nav-btn secondary">
           ← Back to Cart
         </Link>

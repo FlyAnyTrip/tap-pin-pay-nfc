@@ -19,7 +19,7 @@ const Home = () => {
 
   useEffect(() => {
     updatePageMeta(
-      "Home - QR & NFC Scanner",
+      "Scanner - QR & NFC Scanner",
       "Scan QR codes and NFC tags to add products to your cart. Modern shopping experience with instant product recognition.",
     )
     scrollToTop()
@@ -126,7 +126,7 @@ const Home = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h1>🚀 Tip Tap Pay</h1>
+        <h1>🚀 Tip Tap Pay Scanner</h1>
         <p>Scan QR codes & NFC tags to add products instantly</p>
       </motion.div>
 
@@ -136,6 +136,10 @@ const Home = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
       >
+        <Link to="/" className="nav-btn secondary">
+          ← Back to Home
+        </Link>
+
         <Link to="/cart" className="nav-btn secondary">
           🛒 Cart ({getItemCount()})
         </Link>
